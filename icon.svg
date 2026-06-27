@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="80" fill="#0f1623"/>
+  <rect width="512" height="512" rx="80" fill="#10b981" opacity="0.15"/>
+  <circle cx="256" cy="220" r="120" fill="none" stroke="#10b981" stroke-width="28"/>
+  <path d="M256 140 L256 220 L316 280" stroke="#10b981" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <circle cx="256" cy="220" r="14" fill="#10b981"/>
+  <path d="M150 380 Q256 340 362 380" stroke="#10b981" stroke-width="20" stroke-linecap="round" fill="none" opacity="0.6"/>
+  <text x="256" y="470" font-family="system-ui,sans-serif" font-size="48" font-weight="800" fill="#10b981" text-anchor="middle" opacity="0.9">FP</text>
+</svg>

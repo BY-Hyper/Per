@@ -1,0 +1,2257 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>FinancePro – Gestão Financeira</title>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#10b981"/>
+<link rel="icon" href="icon.svg" type="image/svg+xml"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<script src="https://unpkg.com/dexie@3.2.4/dist/dexie.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="stylesheet" href="fp-extensions.css"/>
+<link rel="stylesheet" href="fp-ai-pro.css"/>
+<link rel="stylesheet" href="fp-import-pro.css"/>
+<link rel="stylesheet" href="fp-llm-pro.css"/>
+<script src="fp-pix-enrichment.js"></script>
+<script src="fp-pix-manager-ui.js"></script>
+<script src="fp-pix-updater.js"></script>
+<script src="fp-pix-smart-enricher.js"></script>
+<!-- IA Maintenance & Support — DEVE vir ANTES de fp-ai-pro-v3.js -->
+<!-- Extensões: gamificação, backup, biometria -->
+<!-- Melhorias IA 1-5: Simulador, Desafios, Relatórios, ML, Fraude -->
+<!-- Melhorias IA 6-10: Metas, Forecasting, Backup, Offline, Calculadora -->
+<!-- Integrador mestre: conecta todos os módulos -->
+<!-- Motor de Categorização Inteligente v2 (4 camadas + UI rica) -->
+<!-- Orçamento Pro (mantido para compatibilidade, redireciona para Controle) -->
+<!-- Controle Financeiro Inteligente (unifica Orçamentos + Orçamento Pro) -->
+<!-- Melhorias do Sistema: modal de regras rico, health widget, hooks globais -->
+
+<style>
+/* ═══════════════ DESIGN TOKENS ═══════════════ */
+:root{
+  --accent:#10b981; --accent-d:#059669; --accent-l:#d1fae5; --accent-rgb:16,185,129;
+  --success:#10b981; --danger:#ef4444; --warning:#f59e0b; --info:#3b82f6;
+  --font-h:'Outfit',sans-serif; --font-b:'DM Sans',sans-serif;
+  --r:10px; --r-md:14px; --r-lg:20px; --r-full:9999px;
+  --tr:0.2s ease; --tr-f:0.12s ease;
+  --shadow:0 2px 8px rgba(0,0,0,.06),0 1px 3px rgba(0,0,0,.04);
+  --shadow-md:0 6px 20px rgba(0,0,0,.08),0 2px 6px rgba(0,0,0,.04);
+  --shadow-lg:0 12px 36px rgba(0,0,0,.12),0 4px 12px rgba(0,0,0,.06);
+  --shadow-a:0 4px 14px rgba(var(--accent-rgb),.3);
+  --sidebar-w:250px;
+}
+[data-theme=light]{
+  --bg:#f0f2f6; --bg-s:#e8eaf0; --surf:#fff; --surf2:#fff;
+  --sb-bg:rgb(14, 22, 41); --sb-t:#8b9ab0; --sb-act:#fff; --sb-act-bg:rgba(255,255,255,.08);
+  --txt:#111827; --txt2:#6b7280; --txt3:#9ca3af;
+  --bdr:#e5e7eb; --bdr-s:#d1d5db;
+  --inp-bg:#f9fafb; --inp-bdr:#e5e7eb;
+}
+[data-theme=dark]{
+  --bg:#0d1117; --bg-s:#161b22; --surf:#1c2128; --surf2:#21262d;
+  --sb-bg:#0a0e14; --sb-t:#8b949e; --sb-act:#e6edf3; --sb-act-bg:rgba(255,255,255,.07);
+  --txt:#e6edf3; --txt2:#8b949e; --txt3:#6e7681;
+  --bdr:#30363d; --bdr-s:#484f58;
+  --inp-bg:#161b22; --inp-bdr:#30363d;
+  --shadow:0 2px 8px rgba(0,0,0,.2); --shadow-md:0 6px 20px rgba(0,0,0,.3);
+}
+
+/* ═══════════════ RESET ═══════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-b);font-size:15px;color:var(--txt);background:var(--bg);line-height:1.6;min-height:100vh;-webkit-font-smoothing:antialiased;transition:background var(--tr),color var(--tr)}
+h1,h2,h3,h4{font-family:var(--font-h);font-weight:700;line-height:1.2;color:var(--txt)}
+h1{font-size:1.9rem} h2{font-size:1.5rem} h3{font-size:1.15rem} h4{font-size:1rem}
+a{color:var(--accent);text-decoration:none}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bdr-s);border-radius:var(--r-full)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.hidden{display:none!important}
+.text-success{color:var(--success)!important}.text-danger{color:var(--danger)!important}
+.text-warning{color:var(--warning)!important}.text-muted{color:var(--txt2)!important}
+
+/* ═══════════════ AUTH ═══════════════ */
+#authScreen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.5rem;background:var(--bg);position:relative;overflow:hidden}
+.auth-blob{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none}
+.auth-blob-1{width:350px;height:350px;background:var(--accent);top:-100px;left:-100px;opacity:.12}
+.auth-blob-2{width:280px;height:280px;background:#3b82f6;bottom:-80px;right:-80px;opacity:.12}
+.auth-brand{text-align:center;margin-bottom:2rem;z-index:1}
+.auth-brand-logo{width:60px;height:60px;background:var(--accent);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;color:#fff;margin:0 auto 12px;box-shadow:var(--shadow-a)}
+.auth-brand-name{font-family:var(--font-h);font-size:2rem;font-weight:800;color:var(--txt);letter-spacing:-.5px}
+.auth-brand-sub{color:var(--txt2);font-size:.9rem;margin-top:4px}
+.auth-card{background:var(--surf);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);padding:2rem;width:100%;max-width:400px;border:1px solid var(--bdr);z-index:1;animation:slideUp .35s cubic-bezier(.34,1.3,.64,1)}
+@keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.auth-tabs{display:flex;background:var(--bg-s);border-radius:var(--r);padding:3px;margin-bottom:1.5rem;gap:3px}
+.auth-tab{flex:1;padding:8px;border:none;background:transparent;border-radius:7px;font-family:var(--font-b);font-size:.875rem;font-weight:600;color:var(--txt2);cursor:pointer;transition:all var(--tr-f)}
+.auth-tab.active{background:var(--surf);color:var(--txt);box-shadow:var(--shadow)}
+.auth-panel{display:none}.auth-panel.active{display:block}
+.pwd-bar{height:3px;background:var(--bdr);border-radius:var(--r-full);margin-top:6px;overflow:hidden}
+.pwd-fill{height:100%;border-radius:var(--r-full);transition:width var(--tr),background var(--tr);width:0}
+.pwd-label{font-size:.75rem;color:var(--txt2);margin-top:3px;display:block}
+
+/* ═══════════════ LAYOUT ═══════════════ */
+#appShell{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar-w);background:var(--sb-bg);position:fixed;top:0;left:0;bottom:0;z-index:200;display:flex;flex-direction:column;transition:transform var(--tr)}
+.sb-brand{display:flex;align-items:center;gap:10px;padding:20px 16px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.sb-brand-icon{width:34px;height:34px;background:var(--accent);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;flex-shrink:0;box-shadow:var(--shadow-a)}
+.sb-brand-name{font-family:var(--font-h);font-size:1.15rem;font-weight:800;color:#fff;letter-spacing:-.3px}
+.sb-nav{flex:1;padding:12px 10px;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+.sb-section{font-size:.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--sb-t);padding:14px 8px 5px;opacity:.55}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;color:var(--sb-t);cursor:pointer;transition:all var(--tr-f);border:none;background:none;width:100%;font-family:var(--font-b);font-size:.875rem;font-weight:500;text-align:left}
+.nav-item:hover,.nav-item.active{background:var(--sb-act-bg);color:var(--sb-act)}
+.nav-item.active .ni{color:var(--accent)}
+.ni{width:18px;text-align:center;font-size:14px;flex-shrink:0}
+.sb-footer{padding:10px;border-top:1px solid rgba(255,255,255,.06)}
+.sb-user{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px}
+.sb-avatar{width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;overflow:hidden}
+.sb-avatar img{width:100%;height:100%;object-fit:cover}
+.sb-uname{font-size:.85rem;font-weight:600;color:var(--sb-act);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-urole{font-size:.72rem;color:var(--sb-t);opacity:.7}
+.sb-logout{background:none;border:none;color:var(--sb-t);cursor:pointer;padding:5px;border-radius:6px;font-size:13px;transition:all var(--tr-f);margin-left:auto}
+.sb-logout:hover{color:var(--danger);background:rgba(239,68,68,.12)}
+
+/* Overlay (mobile) */
+#sbOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:190}
+#sbOverlay.show{display:block}
+
+/* Mobile header */
+#mobileHeader{display:none;position:fixed;top:0;left:0;right:0;height:54px;background:var(--surf);border-bottom:1px solid var(--bdr);z-index:180;align-items:center;justify-content:space-between;padding:0 1rem}
+.hamburger{background:none;border:none;cursor:pointer;display:flex;flex-direction:column;gap:5px;padding:4px}
+.hamburger span{display:block;width:20px;height:2px;background:var(--txt);border-radius:2px}
+.mobile-logo{font-family:var(--font-h);font-weight:800;color:var(--txt);font-size:1.1rem}
+
+/* Main */
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;min-width:0;overflow-x:hidden;width:0}
+.topbar{display:flex;align-items:center;justify-content:space-between;height:60px;background:var(--surf);border-bottom:1px solid var(--bdr);padding:0 2rem;position:sticky;top:0;z-index:100;gap:1rem}
+.topbar-left{font-size:.85rem;font-weight:500;color:var(--txt2);display:flex;align-items:center;gap:6px}
+.topbar-left i{color:var(--accent)}
+.topbar-right{display:flex;align-items:center;gap:.75rem}
+.icon-btn{width:36px;height:36px;border-radius:8px;background:var(--surf);border:1.5px solid var(--bdr);color:var(--txt2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;transition:all var(--tr-f)}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(var(--accent-rgb),.06)}
+.global-search{display:flex;align-items:center;gap:8px;background:var(--bg-s);border:1.5px solid var(--bdr);border-radius:8px;padding:0 10px;transition:border-color var(--tr-f)}
+.global-search:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(var(--accent-rgb),.1)}
+.global-search i{color:var(--txt3);font-size:12px}
+.global-search input{background:transparent;border:none;outline:none;font-size:.85rem;color:var(--txt);width:160px;padding:7px 0;font-family:var(--font-b)}
+.global-search input::placeholder{color:var(--txt3)}
+.global-search kbd{font-size:.65rem;padding:1px 5px;background:var(--bdr);border-radius:4px;color:var(--txt3);font-family:var(--font-b)}
+.notif-btn{position:relative}
+.notif-badge{position:absolute;top:-3px;right:-3px;min-width:16px;height:16px;background:var(--danger);color:#fff;border-radius:var(--r-full);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 3px;border:2px solid var(--surf)}
+
+/* Pages */
+.pages{flex:1;position:relative;min-width:0;overflow:hidden}
+.page{display:none;padding:1.75rem 2rem;animation:pageIn .2s ease;max-width:100%;box-sizing:border-box}
+.page.active{display:block}
+@keyframes pageIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.page-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap}
+.page-title{font-size:1.75rem;font-weight:800;letter-spacing:-.5px}
+.page-sub{color:var(--txt2);font-size:.85rem;margin-top:3px}
+.hdr-actions{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+
+/* ═══════════════ CARDS ═══════════════ */
+.card{background:var(--surf);border-radius:var(--r-md);box-shadow:var(--shadow);border:1px solid var(--bdr)}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--bdr)}
+.card-title{font-size:.95rem;font-weight:600;display:flex;align-items:center;gap:6px}
+.card-body{padding:1.25rem}
+
+/* ═══════════════ FORMS ═══════════════ */
+.form-group{margin-bottom:1rem}
+.form-label{display:block;font-size:.82rem;font-weight:500;color:var(--txt2);margin-bottom:5px}
+.inp-wrap{position:relative;display:flex;align-items:center}
+.inp-icon{position:absolute;left:12px;color:var(--txt3);font-size:.82rem;pointer-events:none;z-index:1}
+.form-inp{width:100%;padding:9px 12px;background:var(--inp-bg);border:1.5px solid var(--inp-bdr);border-radius:var(--r);color:var(--txt);font-family:var(--font-b);font-size:.875rem;transition:border-color var(--tr-f),box-shadow var(--tr-f);outline:none;appearance:none}
+.inp-wrap .form-inp{padding-left:36px}
+.form-inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(var(--accent-rgb),.1)}
+.form-inp::placeholder{color:var(--txt3)}
+select.form-inp{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:32px;cursor:pointer}
+input[type=color].form-inp{padding:4px 8px;height:38px;cursor:pointer}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem}
+.check-label{display:flex;align-items:center;gap:8px;font-size:.875rem;color:var(--txt2);cursor:pointer}
+.check-label input{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+.eye-btn{position:absolute;right:10px;background:none;border:none;color:var(--txt3);cursor:pointer;padding:3px;transition:color var(--tr-f)}
+.eye-btn:hover{color:var(--txt)}
+
+/* ═══════════════ BUTTONS ═══════════════ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 16px;border:1.5px solid transparent;border-radius:8px;font-family:var(--font-b);font-size:.875rem;font-weight:600;cursor:pointer;transition:all var(--tr-f);white-space:nowrap;line-height:1}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 2px 6px rgba(var(--accent-rgb),.25)}
+.btn-primary:hover:not(:disabled){background:var(--accent-d);border-color:var(--accent-d);transform:translateY(-1px);box-shadow:0 4px 10px rgba(var(--accent-rgb),.35)}
+.btn-outline{background:transparent;border-color:var(--bdr-s);color:var(--txt)}
+.btn-outline:hover:not(:disabled){border-color:var(--accent);color:var(--accent);background:rgba(var(--accent-rgb),.05)}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--txt2)}
+.btn-ghost:hover:not(:disabled){background:var(--bg-s);color:var(--txt)}
+.btn-danger{background:var(--danger);color:#fff;border-color:var(--danger)}
+.btn-danger:hover:not(:disabled){background:#dc2626;transform:translateY(-1px)}
+.btn-full{width:100%}
+.btn-sm{padding:5px 10px;font-size:.8rem}
+.btn-xs{padding:3px 8px;font-size:.75rem}
+.link-btn{background:none;border:none;color:var(--accent);font-size:.85rem;font-weight:500;cursor:pointer;padding:0;font-family:var(--font-b);transition:color var(--tr-f)}
+.link-btn:hover{color:var(--accent-d)}
+
+/* ═══════════════ TOGGLE ═══════════════ */
+.toggle{position:relative;width:42px;height:22px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--bdr-s);border-radius:var(--r-full);cursor:pointer;transition:background var(--tr-f)}
+.toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform var(--tr-f);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle input:checked+.toggle-slider{background:var(--accent)}
+.toggle input:checked+.toggle-slider::before{transform:translateX(20px)}
+
+/* ═══════════════ MODAL ═══════════════ */
+.modal-wrap{position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:500;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(3px);animation:fadeIn .15s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--surf);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);border:1px solid var(--bdr);width:100%;max-width:520px;max-height:90vh;overflow-y:auto;animation:modalIn .25s cubic-bezier(.34,1.2,.64,1)}
+@keyframes modalIn{from{opacity:0;transform:translateY(-18px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.modal-sm{max-width:400px}
+.modal-lg{max-width:660px}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.4rem;border-bottom:1px solid var(--bdr);position:sticky;top:0;background:var(--surf);z-index:2}
+.modal-title{font-size:1.1rem;font-weight:700}
+.modal-close{width:30px;height:30px;border-radius:7px;background:none;border:none;color:var(--txt3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--tr-f)}
+.modal-close:hover{background:var(--bg-s);color:var(--txt)}
+.modal-body{padding:1.25rem 1.4rem}
+.modal-footer{padding:.9rem 1.4rem;border-top:1px solid var(--bdr);display:flex;justify-content:flex-end;gap:.6rem;position:sticky;bottom:0;background:var(--surf)}
+
+/* ═══════════════ TOAST ═══════════════ */
+#toastContainer{position:fixed;bottom:1.25rem;right:1.25rem;z-index:600;display:flex;flex-direction:column;gap:.6rem;pointer-events:none}
+.toast{display:flex;align-items:center;gap:.6rem;padding:10px 14px;background:var(--surf);border:1px solid var(--bdr);border-radius:8px;box-shadow:var(--shadow-md);font-size:.85rem;font-weight:500;color:var(--txt);min-width:240px;max-width:380px;pointer-events:all;animation:toastIn .25s cubic-bezier(.34,1.4,.64,1);border-left:3px solid var(--bdr-s)}
+.toast-success{border-left-color:var(--success)}.toast-error{border-left-color:var(--danger)}
+.toast-warning{border-left-color:var(--warning)}.toast-info{border-left-color:var(--info)}
+.toast-icon{font-size:14px;flex-shrink:0}
+.toast-success .toast-icon{color:var(--success)}.toast-error .toast-icon{color:var(--danger)}
+.toast-warning .toast-icon{color:var(--warning)}.toast-info .toast-icon{color:var(--info)}
+.toast-msg{flex:1}
+.toast-x{background:none;border:none;color:var(--txt3);cursor:pointer;padding:2px;transition:color var(--tr-f)}
+.toast-x:hover{color:var(--txt)}
+@keyframes toastIn{from{opacity:0;transform:translateX(100%)}to{opacity:1;transform:translateX(0)}}
+
+/* ═══════════════ SKELETON ═══════════════ */
+@keyframes shimmer{0%,100%{opacity:1}50%{opacity:.4}}
+.skel{background:var(--bdr);border-radius:var(--r);animation:shimmer 1.5s ease infinite}
+
+/* ═══════════════ PROGRESS ═══════════════ */
+.progress{height:7px;background:var(--bdr);border-radius:var(--r-full);overflow:hidden}
+.progress-fill{height:100%;border-radius:var(--r-full);transition:width .5s cubic-bezier(.34,1.3,.64,1)}
+.pf-success{background:var(--success)}.pf-warning{background:var(--warning)}
+.pf-danger{background:var(--danger);animation:pulsed 1s ease infinite alternate}
+@keyframes pulsed{from{opacity:1}to{opacity:.65}}
+
+/* ═══════════════ STATS GRID ═══════════════ */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+.stat-card{background:var(--surf);border-radius:var(--r-md);box-shadow:var(--shadow);border:1px solid var(--bdr);padding:1.1rem;display:flex;align-items:flex-start;gap:.9rem;transition:transform var(--tr-f),box-shadow var(--tr-f)}
+.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.stat-icon{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;flex-shrink:0}
+.stat-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:var(--txt2);font-weight:500;margin-bottom:4px}
+.stat-value{font-size:1.35rem;font-weight:800;font-family:var(--font-h);letter-spacing:-.5px;line-height:1}
+.stat-change{font-size:.72rem;margin-top:4px;display:flex;align-items:center;gap:3px}
+.sc-up{color:var(--success)}.sc-down{color:var(--danger)}
+
+/* ═══════════════ TABLE ═══════════════ */
+.table-wrap{overflow-x:auto}
+.table{width:100%;border-collapse:collapse;min-width:550px}
+.table th,.table td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--bdr);font-size:.875rem}
+.table th{font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:var(--txt2);font-weight:600;background:var(--bg-s)}
+.table tbody tr{transition:background var(--tr-f)}
+.table tbody tr:hover{background:rgba(var(--accent-rgb),.025)}
+.table tbody tr:last-child td{border-bottom:none}
+.row-actions{display:flex;gap:4px;opacity:0;transition:opacity var(--tr-f)}
+.table tbody tr:hover .row-actions{opacity:1}
+.row-btn{width:26px;height:26px;border-radius:6px;border:none;background:var(--bg-s);color:var(--txt2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all var(--tr-f)}
+.row-btn:hover{background:var(--accent);color:#fff}
+.row-btn-d:hover{background:var(--danger);color:#fff}
+
+/* ═══════════════ BADGE / CHIP ═══════════════ */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:var(--r-full);font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.badge-success{background:rgba(16,185,129,.12);color:var(--success)}
+.badge-danger{background:rgba(239,68,68,.12);color:var(--danger)}
+.badge-warning{background:rgba(245,158,11,.12);color:var(--warning)}
+.badge-info{background:rgba(59,130,246,.12);color:var(--info)}
+.badge-neutral{background:var(--bg-s);color:var(--txt2)}
+.tag-chip{display:inline-flex;align-items:center;padding:2px 8px;border-radius:var(--r-full);background:rgba(var(--accent-rgb),.1);color:var(--accent);font-size:.72rem;font-weight:500}
+.cat-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:var(--r-full);background:var(--bg-s);font-size:.78rem;font-weight:500;color:var(--txt2)}
+
+/* ═══════════════ EMPTY STATE ═══════════════ */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 2rem;text-align:center;gap:.75rem}
+.empty-icon{font-size:3rem;opacity:.25;color:var(--txt2)}
+.empty-title{font-size:1.05rem;font-weight:600}
+.empty-text{font-size:.875rem;color:var(--txt2);max-width:280px}
+
+/* ═══════════════ AMOUNT INPUT ═══════════════ */
+.amount-box{display:flex;align-items:center;gap:.75rem;padding:1rem 1.1rem;background:var(--bg-s);border-radius:var(--r);border:1.5px solid var(--bdr);transition:border-color var(--tr-f),box-shadow var(--tr-f)}
+.amount-box:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(var(--accent-rgb),.1)}
+.amount-sym{font-size:1.1rem;font-weight:600;color:var(--txt2);white-space:nowrap}
+.amount-inp{flex:1;background:transparent;border:none;outline:none;font-size:1.75rem;font-family:var(--font-h);font-weight:800;color:var(--txt);min-width:0}
+.amount-inp::placeholder{color:var(--txt3)}
+
+/* ═══════════════ TYPE TOGGLE ═══════════════ */
+.type-toggle{display:flex;gap:4px;background:var(--bg-s);border-radius:var(--r);padding:3px;margin-bottom:1rem}
+.type-btn{flex:1;padding:7px;border:none;background:transparent;border-radius:7px;color:var(--txt2);font-family:var(--font-b);font-size:.83rem;font-weight:600;cursor:pointer;transition:all var(--tr-f);display:flex;align-items:center;justify-content:center;gap:5px}
+.type-btn.active-expense{background:var(--danger);color:#fff}
+.type-btn.active-income{background:var(--success);color:#fff}
+.type-btn.active-transfer{background:var(--info);color:#fff}
+
+/* ═══════════════ PERIOD FILTER ═══════════════ */
+.period-filter{display:flex;background:var(--surf);border:1.5px solid var(--bdr);border-radius:8px;overflow:hidden}
+.period-btn{padding:7px 13px;border:none;background:transparent;color:var(--txt2);font-family:var(--font-b);font-size:.82rem;font-weight:500;cursor:pointer;transition:all var(--tr-f)}
+.period-btn.active{background:var(--accent);color:#fff}
+.period-btn:not(.active):hover{background:var(--bg-s);color:var(--txt)}
+
+/* ═══════════════ DASHBOARD ═══════════════ */
+.charts-row{display:grid;grid-template-columns:1fr 2fr;gap:1rem;margin-bottom:1rem;min-width:0}
+.dash-bottom{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.chart-wrap{padding:1rem;min-height:240px;display:flex;align-items:center;justify-content:center;min-width:0;overflow:hidden;width:100%;box-sizing:border-box}
+
+/* ═══════════════ CATEGORIES PAGE ═══════════════ */
+.cats-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.cat-item{display:flex;align-items:center;justify-content:space-between;padding:.8rem 1rem;border-bottom:1px solid var(--bdr)}
+.cat-item:last-child{border-bottom:none}
+.cat-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;flex-shrink:0}
+.cat-name{font-size:.88rem;font-weight:500}
+.cat-meta{font-size:.72rem;color:var(--txt2);margin-top:1px}
+
+/* ═══════════════ BUDGET PAGE ═══════════════ */
+.budgets-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin-top:1rem}
+.budget-item{background:var(--surf);border-radius:var(--r-md);box-shadow:var(--shadow);border:1px solid var(--bdr);padding:1rem}
+.budget-item-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
+.budget-spent{font-size:1.15rem;font-weight:800;font-family:var(--font-h)}
+.budget-limit{font-size:.75rem;color:var(--txt2)}
+.budget-inp{width:100%;margin-top:.6rem;padding:5px 8px;background:var(--bg-s);border:1.5px dashed var(--bdr-s);border-radius:6px;color:var(--txt);font-family:var(--font-b);font-size:.82rem;outline:none;transition:border-color var(--tr-f)}
+.budget-inp:focus{border-color:var(--accent);border-style:solid}
+
+/* ═══════════════ GOALS PAGE ═══════════════ */
+.goals-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem}
+.goal-card{background:var(--surf);border-radius:var(--r-md);box-shadow:var(--shadow);border:1px solid var(--bdr);padding:1.25rem;transition:transform var(--tr-f),box-shadow var(--tr-f)}
+.goal-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.goal-ico{width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent-d));display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px}
+.goal-name{font-size:1rem;font-weight:700;margin:.75rem 0 3px}
+.goal-deadline{font-size:.72rem;color:var(--txt2);margin-bottom:.75rem}
+.goal-amounts{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:.6rem}
+.goal-curr{font-size:1.3rem;font-weight:800;font-family:var(--font-h)}
+.goal-tgt{font-size:.82rem;color:var(--txt2)}
+
+/* ═══════════════ ACCOUNTS PAGE ═══════════════ */
+.accounts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;margin-bottom:1.25rem}
+.account-card{background:var(--surf);border-radius:var(--r-md);box-shadow:var(--shadow);border:1px solid var(--bdr);padding:1.25rem;position:relative;overflow:hidden;transition:transform var(--tr-f),box-shadow var(--tr-f);cursor:default}
+.account-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.account-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--ac-color,var(--accent))}
+.account-type{font-size:.7rem;text-transform:uppercase;letter-spacing:.5px;color:var(--txt2);margin-bottom:.6rem}
+.account-name{font-size:1rem;font-weight:700;margin-bottom:4px}
+.account-bal{font-size:1.4rem;font-weight:800;font-family:var(--font-h)}
+.account-actions{display:flex;gap:.5rem;margin-top:.9rem}
+
+/* ═══════════════ REPORTS ═══════════════ */
+.reports-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.report-full{grid-column:1/-1}
+
+/* ═══════════════ SETTINGS ═══════════════ */
+.settings-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1rem}
+.settings-grid .card{overflow:visible}
+.settings-section{padding:1.1rem 1.25rem}
+.theme-opts{display:flex;gap:.6rem}
+.theme-opt{flex:1;padding:9px;border:1.5px solid var(--bdr);border-radius:8px;background:transparent;color:var(--txt2);font-family:var(--font-b);font-size:.83rem;font-weight:500;cursor:pointer;transition:all var(--tr-f);display:flex;align-items:center;justify-content:center;gap:5px}
+.theme-opt.active{border-color:var(--accent);color:var(--accent);background:rgba(var(--accent-rgb),.07)}
+.accent-row{display:flex;gap:.6rem;flex-wrap:wrap}
+.accent-dot{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform var(--tr-f),border-color var(--tr-f)}
+.accent-dot.active{border-color:var(--txt);transform:scale(1.12)}
+.accent-dot:hover{transform:scale(1.05)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--bdr);gap:1rem}
+.toggle-row:last-child{border-bottom:none}
+.toggle-row-info strong{font-size:.875rem;display:block;margin-bottom:2px}
+.toggle-row-info span{font-size:.75rem;color:var(--txt2)}
+.danger-zone{border:1px solid rgba(239,68,68,.3);border-radius:var(--r);padding:.9rem;background:rgba(239,68,68,.04);margin-top:.75rem}
+.danger-title{font-size:.82rem;color:var(--danger);margin-bottom:.6rem;display:flex;align-items:center;gap:5px;font-weight:600}
+.profile-avatar-row{display:flex;align-items:center;gap:1rem;margin-bottom:1rem}
+.profile-avatar{width:58px;height:58px;border-radius:50%;background:var(--accent);color:#fff;font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+.profile-avatar img{width:100%;height:100%;object-fit:cover}
+
+/* ═══════════════ IMPORT ═══════════════ */
+.drop-zone{border:2px dashed var(--bdr-s);border-radius:var(--r-md);padding:2rem;text-align:center;cursor:pointer;transition:all var(--tr-f)}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--accent);background:rgba(var(--accent-rgb),.04)}
+.drop-zone i{font-size:2.5rem;color:var(--accent);margin-bottom:.75rem}
+.drop-zone p{color:var(--txt2);font-size:.875rem;margin:0}
+.preview-table-wrap{max-height:300px;overflow-y:auto;margin-top:.75rem;border:1px solid var(--bdr);border-radius:var(--r)}
+.import-summary{display:flex;gap:1rem;flex-wrap:wrap;padding:.75rem;background:var(--bg-s);border-radius:var(--r);font-size:.83rem;margin-top:.75rem}
+
+/* ═══════════════ SUBSCRIPTIONS ═══════════════ */
+.subs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem}
+.sub-card{background:var(--surf);border-radius:var(--r-md);box-shadow:var(--shadow);border:1px solid var(--bdr);padding:1.1rem;transition:transform var(--tr-f),box-shadow var(--tr-f)}
+.sub-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.sub-card.inactive{opacity:.55}
+.sub-card-hdr{display:flex;align-items:center;gap:.6rem;margin-bottom:.75rem}
+.sub-ico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;flex-shrink:0}
+.sub-name{font-weight:600;font-size:.9rem}
+.sub-cycle-lbl{font-size:.7rem;color:var(--txt2)}
+.sub-amount{font-size:1.25rem;font-weight:800;font-family:var(--font-h);margin-bottom:3px}
+.sub-eq{font-size:.72rem;color:var(--txt2);margin-bottom:.6rem}
+.sub-due{font-size:.75rem;padding:4px 8px;border-radius:6px;background:var(--bg-s);margin-bottom:.6rem;display:flex;align-items:center;gap:5px}
+.sub-due.alert{background:rgba(245,158,11,.1);color:var(--warning)}
+.sub-due.overdue{background:rgba(239,68,68,.1);color:var(--danger)}
+.sub-actions{display:flex;gap:.4rem;flex-wrap:wrap}
+
+/* ═══════════════ FORECAST ═══════════════ */
+.forecast-bottom{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem}
+
+/* ═══════════════ CALCULATOR ═══════════════ */
+.calc-result{padding:.9rem;background:var(--bg-s);border-radius:var(--r);border:1px solid var(--bdr);margin-top:.5rem}
+.calc-kpi-row{display:flex;gap:1rem;flex-wrap:wrap}
+.calc-kpi{display:flex;flex-direction:column;gap:3px;flex:1;min-width:90px}
+.calc-kpi-lbl{font-size:.72rem;color:var(--txt2);font-weight:500}
+.calc-kpi-val{font-size:1.05rem;font-weight:700;font-family:var(--font-h)}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start}
+
+/* ═══════════════ PATRIMONY ═══════════════ */
+.pat-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem}
+.pat-item{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid var(--bdr)}
+.pat-item:last-child{border-bottom:none}
+
+/* ═══════════════ SPLIT ═══════════════ */
+.split-participant-row{display:flex;align-items:center;gap:.6rem;padding:.6rem 0;border-bottom:1px solid var(--bdr)}
+.split-participant-row:last-child{border-bottom:none}
+.split-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;flex-shrink:0}
+.split-participant-info{flex:1;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.split-pname{font-size:.85rem;font-weight:500}
+.split-share{font-size:.82rem;color:var(--txt2);font-weight:500}
+
+/* ═══════════════ LOCK SCREEN ═══════════════ */
+#lockScreen{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.88);backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:center;animation:fadeIn .2s ease}
+.lock-card{background:var(--surf);border-radius:var(--r-lg);padding:2.5rem 2rem;text-align:center;max-width:320px;width:100%;border:1px solid var(--bdr);box-shadow:var(--shadow-lg)}
+.lock-ico{font-size:44px;color:var(--accent);margin-bottom:1rem}
+.lock-title{font-size:1.25rem;font-weight:700;margin-bottom:.3rem}
+.lock-sub{font-size:.85rem;color:var(--txt2);margin-bottom:1.25rem}
+.lock-dots{display:flex;justify-content:center;gap:12px;margin-bottom:1.25rem}
+.lock-dot{width:13px;height:13px;border-radius:50%;border:2px solid var(--bdr-s);transition:all var(--tr-f)}
+.lock-dot.filled{background:var(--accent);border-color:var(--accent)}
+.lock-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:220px;margin:0 auto}
+.lock-key{aspect-ratio:1;border-radius:50%;border:1.5px solid var(--bdr);background:var(--bg-s);font-size:1.2rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--tr-f);color:var(--txt);font-family:var(--font-h)}
+.lock-key:hover:not(.lock-key-empty){background:var(--accent);color:#fff;border-color:var(--accent);transform:scale(1.06)}
+.lock-key:active{transform:scale(.94)}
+.lock-key-empty{cursor:default;border:none;background:transparent}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.shake{animation:shake .4s ease}
+
+/* ═══════════════ ONBOARDING ═══════════════ */
+.onboarding-wrap{position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:1rem}
+.onboarding-card{background:var(--surf);border-radius:var(--r-lg);padding:2.5rem 2rem;max-width:440px;width:100%;text-align:center;box-shadow:var(--shadow-lg);animation:modalIn .3s cubic-bezier(.34,1.2,.64,1)}
+.ob-icon{font-size:52px;margin-bottom:1rem}
+.ob-title{font-size:1.4rem;font-weight:800;margin-bottom:.5rem}
+.ob-text{color:var(--txt2);font-size:.9rem;margin-bottom:1.25rem}
+.ob-dots{display:flex;justify-content:center;gap:6px;margin-bottom:1.25rem}
+.ob-dot{width:7px;height:7px;border-radius:50%;background:var(--bdr-s);transition:all var(--tr-f)}
+.ob-dot.active{background:var(--accent);width:18px;border-radius:4px}
+
+/* ═══════════════ FAB ═══════════════ */
+#fab{position:fixed;bottom:1.25rem;right:1.25rem;width:52px;height:52px;background:var(--accent);color:#fff;border:none;border-radius:50%;font-size:20px;display:none;align-items:center;justify-content:center;cursor:pointer;z-index:150;box-shadow:var(--shadow-a);transition:all var(--tr-f)}
+#fab:hover{transform:scale(1.08) translateY(-2px);box-shadow:0 8px 20px rgba(var(--accent-rgb),.4)}
+
+/* ═══════════════ RESPONSIVE ═══════════════ */
+@media(max-width:1100px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .charts-row{grid-template-columns:1fr}
+  .dash-bottom{grid-template-columns:1fr}
+  .reports-grid{grid-template-columns:1fr}
+  .calc-grid{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  :root{--sidebar-w:0px}
+  .sidebar{transform:translateX(-100%);--sidebar-w:250px}
+  .sidebar.open{transform:translateX(0);box-shadow:var(--shadow-lg)}
+  .main{margin-left:0;padding-top:54px}
+  #mobileHeader{display:flex}
+  #fab{display:flex}
+  .topbar{display:none}
+  .page{padding:1rem}
+  .stats-grid{grid-template-columns:1fr 1fr;gap:.6rem}
+  .form-row,.form-row-3{grid-template-columns:1fr}
+  .cats-grid,.pat-grid{grid-template-columns:1fr}
+  .subs-grid,.goals-grid,.accounts-grid{grid-template-columns:1fr}
+  .forecast-bottom{grid-template-columns:1fr}
+  .settings-grid{grid-template-columns:1fr}
+  .theme-opts{flex-direction:column}
+  .modal-wrap{align-items:flex-end;padding:0}
+  .modal{border-radius:var(--r-lg) var(--r-lg) 0 0;max-height:92vh}
+  #toastContainer{bottom:4.5rem;right:.75rem;left:.75rem}
+  .toast{max-width:none}
+  .row-actions{opacity:1}
+}
+@media(max-width:420px){
+  .stats-grid{grid-template-columns:1fr}
+  .hdr-actions{width:100%}
+  .hdr-actions .btn{flex:1;justify-content:center}
+}
+@media print{
+  .sidebar,#mobileHeader,#fab,.topbar,.hdr-actions,.row-actions{display:none!important}
+  .main{margin-left:0}
+  .card{box-shadow:none;border:1px solid #ddd}
+}
+
+      /* ── CALENDÁRIO FINANCEIRO ── */
+      .cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:3px}
+      .cal-wd{text-align:center;font-size:.68rem;font-weight:700;color:var(--txt2);padding:5px 2px;text-transform:uppercase;letter-spacing:.3px}
+      .cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+      .cal-day{border-radius:8px;border:1px solid var(--bdr);padding:4px 3px;min-height:64px;cursor:pointer;transition:all .12s;position:relative;user-select:none}
+      .cal-day:hover{background:rgba(var(--accent-rgb),.08);border-color:var(--accent)}
+      .cal-day:focus{outline:2px solid var(--accent);outline-offset:1px}
+      .cal-today{border-color:var(--accent)!important;background:rgba(var(--accent-rgb),.07)!important}
+      .cal-today .cal-day-num{background:var(--accent)!important;color:#fff!important;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800}
+      .cal-weekend .cal-day-num{opacity:.6}
+      .cal-has-tx{background:rgba(var(--accent-rgb),.02)}
+      .cal-day-num{font-size:.8rem;font-weight:600;color:var(--txt);margin-bottom:3px;min-height:20px;display:flex;align-items:center}
+      .cal-sub-dot{position:absolute;top:3px;right:4px;color:var(--warning);font-size:.6rem}
+      .cal-amount{font-size:.58rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.45}
+      .cal-exp{color:var(--danger)}.cal-inc{color:var(--success)}
+      .cal-empty{opacity:0;pointer-events:none;border-color:transparent!important}
+      #calDayPanel.hidden{display:none!important}
+      @media(max-width:650px){.cal-day{min-height:48px}.cal-amount{font-size:.5rem}}
+
+      /* ── OVERFLOW FIX ── */
+      .main,.pages,.page{box-sizing:border-box}
+      canvas{max-width:100%!important}
+      .chart-wrap canvas{width:100%!important;height:auto!important}
+      @media(max-width:900px){
+        .charts-row{grid-template-columns:1fr!important}
+        .dash-bottom{grid-template-columns:1fr!important}
+      }
+      @media(max-width:700px){
+        .page{padding:1rem!important}
+        .stats-grid{grid-template-columns:1fr 1fr!important}
+      }
+      @media(max-width:480px){
+        .stats-grid{grid-template-columns:1fr!important}
+      }
+
+      /* ── DREAM SYSTEM (Goals) ── */
+      .goal-card-v2{transition:transform .15s,box-shadow .15s}
+      .goal-card-v2:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,.1)}
+      .dream-plan-box{background:var(--bg-s);border-radius:10px;padding:.85rem 1rem;margin-top:.6rem;border:1px solid var(--bdr)}
+      .dream-plan-title{font-size:.78rem;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem}
+      
+      /* ── GLOBAL SEARCH ── */
+      .gs-item{display:flex;align-items:center;gap:.5rem;padding:.6rem 1rem;cursor:pointer;font-size:.85rem;border-bottom:0.5px solid var(--bdr)}
+      .gs-item:hover{background:var(--bg-s)}
+      .gs-item:last-child{border-bottom:none}
+      /* Compact tx mode */
+      .tx-compact td{padding:3px 8px!important;font-size:.78rem!important}
+      /* Category health */
+      #catHealthGrid .grade-A{color:var(--success)} #catHealthGrid .grade-F{color:var(--danger)}
+
+      /* ── LAYOUT OVERFLOW FIXES ── */
+      /* All cards: prevent content overflow */
+      .card{overflow:hidden;word-break:break-word}
+      /* Smart recurring alert */
+      #smartRecurringAlert .card *{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+      #smartRecurringAlert [style*="display:flex"]{flex-wrap:wrap;gap:.4rem}
+      /* Goals cards */
+      .goal-card-v2{overflow:hidden}
+      .goal-card-v2 .card-title{white-space:normal;word-break:break-word;font-size:.95rem!important}
+      .goal-card-v2 [style*="font-size:1rem"]{font-size:.92rem!important;word-break:break-word}
+      /* 50/30/20 ideal summary */
+      #rule5020Ideal{word-break:break-word}
+      #rule5020Ideal div{flex-wrap:wrap;gap:2px}
+      /* National comparison */
+      #nationalCompGrid div[style*="display:flex"]{flex-wrap:wrap;gap:4px}
+      #nationalCompGrid>div>div:last-child{font-size:.72rem!important}
+      /* Category health scores */
+      #catHealthGrid [style*="display:flex"]{flex-wrap:wrap}
+      #catHealthGrid [style*="text-overflow"]{max-width:120px}
+      /* Auto theme settings */
+      #autoThemeSettings{overflow:hidden;word-break:break-word}
+      #autoThemeSettings label{flex-wrap:wrap;max-width:100%}
+      #autoThemeSettings div[style]{max-width:100%;overflow:hidden}
+      /* Recorrências alert */
+      #smartRecurringAlert .card>div>div{overflow:hidden;max-width:100%}
+      /* Import status text */
+      #importStatus{word-break:break-all;overflow-wrap:anywhere}
+      /* Stats grid responsive */
+      .stats-grid{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))!important}
+      /* Fix table overflow in rules */
+      #rulesList table{table-layout:fixed;width:100%}
+      #rulesList td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:0}
+      #rulesList td:last-child{white-space:nowrap;width:40px}
+      /* Prevent horizontal scroll on main pages */
+      .page{overflow-x:hidden!important;max-width:100vw}
+      .card-grid-2col{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem}
+
+      /* ── CATEGORIAS RICH CARDS ── */
+      #catCardsExpense .card,#catCardsIncome .card{overflow:visible}
+      #catCardsExpense .card:hover,#catCardsIncome .card:hover{z-index:2}
+      .cat-budget-over{animation:pulsed 1s ease infinite alternate}
+      /* Tab de detalhes da categoria */
+      .catdetabtab:hover{background:var(--bg-s)!important;border-radius:6px 6px 0 0}
+      /* Badges de confiança de importação */
+      .conf-badge{display:inline-flex;align-items:center;margin-left:4px;vertical-align:middle}
+      /* Detective modal */
+      #modalDetective .modal{max-width:460px}
+      /* Reclassification highlight */
+      @keyframes highlightRow{0%{background:rgba(var(--accent-rgb),.25)}100%{background:transparent}}
+      .tx-reclassified{animation:highlightRow 1.5s ease forwards}
+      /* Regras de categoria - table */
+      #catRulesPanel table td{max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      #catRulesPanel table td:first-child{max-width:200px}
+      /* Responsive category cards */
+      @media(max-width:600px){.card-grid-2col{grid-template-columns:1fr!important}}
+
+      /* ══ CONTROLE FINANCEIRO ══ */
+      .cf-kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.65rem;margin-bottom:1rem}
+      .cf-kpi{display:flex;align-items:center;gap:.6rem;padding:.75rem .9rem;background:var(--surf);border-radius:var(--r-md);border:1px solid var(--bdr);border-left-width:4px}
+      .cf-kpi-ico{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+      .cf-kpi-lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.4px;color:var(--txt2);font-weight:600;margin-bottom:1px}
+      .cf-kpi-val{font-size:1rem;font-weight:800;font-family:var(--font-h);letter-spacing:-.3px;line-height:1}
+      /* Tab strip */
+      .cf-tab{padding:.5rem 1rem;border:none;background:none;font-size:.85rem;font-weight:600;color:var(--txt2);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
+      .cf-tab:hover{color:var(--txt)}
+      .cf-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+      /* Cards grid */
+      .cf-cards-grid{display:flex;flex-direction:column;gap:.65rem;margin-bottom:1rem}
+      /* Card */
+      .cf-card{background:var(--surf);border-radius:var(--r-md);border:1px solid var(--bdr);box-shadow:var(--shadow);overflow:hidden;transition:box-shadow .15s,border-color .15s}
+      .cf-card:hover{border-color:rgba(var(--accent-rgb),.35)}
+      .cf-card--expanded{border-color:rgba(var(--accent-rgb),.4);box-shadow:var(--shadow-md)}
+      .cf-card-hdr{display:flex;align-items:center;gap:.65rem;padding:.75rem 1rem;cursor:pointer;user-select:none;transition:background .12s}
+      .cf-card-hdr:hover{background:var(--bg-s)}
+      .cf-card-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;flex-shrink:0}
+      .cf-card-body{border-top:1px solid var(--bdr);animation:fadeIn .15s ease}
+      .cf-expand-btn{width:26px;height:26px;border-radius:6px;border:1px solid var(--bdr);background:var(--bg-s);color:var(--txt3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .12s;flex-shrink:0}
+      .cf-expand-btn:hover{background:rgba(var(--accent-rgb),.1);border-color:var(--accent);color:var(--accent)}
+      /* Pills */
+      .cf-pill{display:inline-flex;align-items:center;gap:2px;padding:1px 6px;border-radius:99px;font-size:.68rem;font-weight:600;white-space:nowrap}
+      .cf-pill--exp{background:rgba(239,68,68,.09);color:var(--danger)}
+      .cf-pill--inc{background:rgba(16,185,129,.09);color:var(--success)}
+      .cf-pill--neu{background:var(--bg-s);color:var(--txt3)}
+      /* Badges */
+      .cf-badge{display:inline-flex;align-items:center;padding:1px 5px;border-radius:4px;font-size:.6rem;font-weight:700;white-space:nowrap}
+      .cf-badge--danger{background:rgba(239,68,68,.15);color:var(--danger)}
+      .cf-badge--warn{background:rgba(249,115,22,.15);color:#f97316}
+      .cf-badge--accent{background:rgba(var(--accent-rgb),.12);color:var(--accent)}
+      /* Desc rows hover */
+      .cf-desc-cb{cursor:pointer}
+      @media(max-width:600px){.cf-kpi-row{grid-template-columns:repeat(2,1fr)}.cf-tab{font-size:.78rem;padding:.4rem .65rem}}
+
+      /* ══ ORÇAMENTO PRO ══ */
+      .orc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin-bottom:1rem}
+      .orc-card{background:var(--surf);border-radius:var(--r-md);border:1px solid var(--bdr);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s,border-color .15s;display:flex;flex-direction:column}
+      .orc-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:var(--accent)}
+      .orc-card-top{padding:1rem;flex:1}
+      .orc-card-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;flex-shrink:0}
+      .orc-card-name{font-size:.92rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.2}
+      .orc-card-sub{font-size:.68rem;color:var(--txt2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      .orc-card-val{font-size:1.15rem;font-weight:800;font-family:var(--font-h);letter-spacing:-.5px;white-space:nowrap}
+      .orc-flow-pill{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:99px;font-size:.72rem;font-weight:700;white-space:nowrap}
+      .orc-card-actions{display:flex;align-items:center;gap:.4rem;padding:.55rem .9rem;border-top:1px solid var(--bdr);background:var(--bg-s)}
+      .orc-kpi{display:flex;align-items:center;gap:.75rem;padding:.85rem 1rem;background:var(--surf);border-radius:var(--r-md);border:1px solid var(--bdr);border-left-width:4px}
+      .orc-kpi-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+      .orc-kpi-lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--txt2);font-weight:600;margin-bottom:2px}
+      .orc-kpi-val{font-size:1.1rem;font-weight:800;font-family:var(--font-h);letter-spacing:-.3px;line-height:1}
+      /* Desc modal items */
+      .desc-item:last-child,.desc-item-fuzzy:last-child{border-bottom:none!important}
+      @media(max-width:600px){.orc-grid{grid-template-columns:1fr}}
+</style>
+
+<!-- TTS widget and scripts -->
+<div id="ttsWidget" style="position:fixed;right:18px;bottom:18px;top:auto;z-index:999;max-width:340px;width:100%;box-sizing:border-box">
+  <div class="card" style="padding:14px 14px;box-shadow:var(--shadow-lg);border:1px solid var(--bdr);border-radius:18px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <div style="font-weight:700">Assistente de Voz</div>
+      <div style="font-size:.83rem;color:var(--txt2)">Versão local</div>
+    </div>
+    <div style="margin-top:10px;display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <label class="check-label"><input type="checkbox" id="ttsUseKokoro"> Usar Kokoro</label>
+      <button id="ttsCloseBtn" class="btn btn-ghost btn-sm" style="font-size:.8rem;padding:.35rem .6rem">Fechar</button>
+    </div>
+    <div style="margin-top:12px">
+      <div class="progress" style="height:8px"><div id="ttsProgress" class="progress-fill pf-success" style="width:0%"></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px">
+        <button id="ttsPreloadBtn" class="btn btn-outline btn-sm" style="width:100%">Pré-carregar</button>
+        <button id="ttsTestBtn" class="btn btn-primary btn-sm" style="width:100%">Testar</button>
+        <button id="ttsClearBtn" class="btn btn-danger btn-sm" style="width:100%">Limpar cache</button>
+      </div>
+      <div id="ttsStatus" style="margin-top:10px;font-size:.82rem;color:var(--txt2);min-height:1.4rem"></div>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="fp-tts.js"></script>
+<script type="module" src="fp-tts-ui.js"></script>
+
+  <!-- wllama: roda modelos GGUF via WebAssembly (UMD bundle) -->
+  <script>
+  // Load wllama dynamically to handle errors gracefully
+  (function(){
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/@wllama/wllama@2.3.0/dist/wllama.umd.min.js';
+    s.onerror = function(){ console.warn('[wllama] CDN load failed'); };
+    s.onload = function(){ console.log('[wllama] Loaded. globals:', typeof Wllama, typeof wllama); };
+    document.head.appendChild(s);
+  })();
+  </script>
+</head>
+<body>
+
+<!-- ═══════════════ AUTH ═══════════════ -->
+<div id="authScreen">
+  <div class="auth-blob auth-blob-1"></div>
+  <div class="auth-blob auth-blob-2"></div>
+  <div class="auth-brand">
+    <div class="auth-brand-logo"><i class="fas fa-chart-pie"></i></div>
+    <div class="auth-brand-name">FinancePro</div>
+    <div class="auth-brand-sub">Sua vida financeira, organizada.</div>
+  </div>
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Entrar</button>
+      <button class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">Criar conta</button>
+    </div>
+    <!-- Login -->
+    <div class="auth-panel active" id="panelLogin">
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <div class="inp-wrap"><i class="fas fa-envelope inp-icon"></i>
+          <input type="email" id="loginEmail" class="form-inp" placeholder="seu@email.com" autocomplete="email"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <div class="inp-wrap"><i class="fas fa-lock inp-icon"></i>
+          <input type="password" id="loginPassword" class="form-inp" placeholder="••••••••" autocomplete="current-password"/>
+          <button type="button" class="eye-btn" onclick="togglePwd('loginPassword',this)"><i class="fas fa-eye"></i></button>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:1rem">
+        <button class="link-btn" onclick="switchAuthTab('forgot')" style="font-size:.8rem">Esqueci a senha</button>
+      </div>
+      <button class="btn btn-primary btn-full" id="loginBtn" onclick="doLogin()">
+        <span>Entrar</span><i class="fas fa-arrow-right"></i>
+      </button>
+    </div>
+    <!-- Register -->
+    <div class="auth-panel" id="panelRegister">
+      <div class="form-group">
+        <label class="form-label">Nome completo</label>
+        <div class="inp-wrap"><i class="fas fa-user inp-icon"></i>
+          <input type="text" id="regName" class="form-inp" placeholder="Maria Silva" autocomplete="name"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <div class="inp-wrap"><i class="fas fa-envelope inp-icon"></i>
+          <input type="email" id="regEmail" class="form-inp" placeholder="seu@email.com" autocomplete="email"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <div class="inp-wrap"><i class="fas fa-lock inp-icon"></i>
+          <input type="password" id="regPassword" class="form-inp" placeholder="Mín. 8 caracteres" autocomplete="new-password" oninput="checkPwdStrength(this.value)"/>
+          <button type="button" class="eye-btn" onclick="togglePwd('regPassword',this)"><i class="fas fa-eye"></i></button>
+        </div>
+        <div class="pwd-bar"><div id="pwdFill" class="pwd-fill"></div></div>
+        <span id="pwdLabel" class="pwd-label"></span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirmar senha</label>
+        <div class="inp-wrap"><i class="fas fa-lock inp-icon"></i>
+          <input type="password" id="regConfirm" class="form-inp" placeholder="Repita a senha" autocomplete="new-password"/>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full" id="registerBtn" onclick="doRegister()">
+        <span>Criar conta</span><i class="fas fa-arrow-right"></i>
+      </button>
+    </div>
+    <!-- Forgot -->
+    <div class="auth-panel" id="panelForgot">
+      <p style="font-size:.85rem;color:var(--txt2);margin-bottom:1rem">Informe seu e-mail. Se existir, simularemos o envio do link de recuperação.</p>
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <div class="inp-wrap"><i class="fas fa-envelope inp-icon"></i>
+          <input type="email" id="forgotEmail" class="form-inp" placeholder="seu@email.com"/>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="doForgot()">Enviar link</button>
+      <div style="text-align:center;margin-top:.75rem">
+        <button class="link-btn" onclick="switchAuthTab('login')"><i class="fas fa-arrow-left"></i> Voltar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ APP SHELL ═══════════════ -->
+<div id="appShell" class="hidden">
+  <!-- Offline indicator -->
+  <div id="offlineBar" style="display:none;align-items:center;justify-content:center;gap:8px;background:#f59e0b;color:#fff;padding:6px;font-size:.82rem;font-weight:500;position:sticky;top:0;z-index:500"><i class="fas fa-wifi" style="opacity:.6"></i> Sem conexão — trabalhando offline</div>
+  <!-- Mobile header -->
+  <header id="mobileHeader">
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <span class="mobile-logo"><i class="fas fa-chart-pie" style="color:var(--accent)"></i> FinancePro</span>
+    <button class="icon-btn" onclick="openGlobalSearch()" title="Busca global (Ctrl+K)" aria-label="Busca global" style="color:var(--txt2)"><i class="fas fa-search"></i></button>
+          <button class="icon-btn" onclick="openQuickEntry()" title="Entrada rápida" aria-label="Entrada rápida" style="color:var(--accent)"><i class="fas fa-bolt"></i></button>
+    <button class="icon-btn notif-btn" onclick="toggleNotifPanel()" aria-label="Notificações">
+      <i class="fas fa-bell"></i>
+      <span class="notif-badge hidden" id="mobileNotifBadge">0</span>
+    </button>
+  </header>
+
+  <!-- Sidebar overlay -->
+  <div id="sbOverlay" onclick="closeSidebar()"></div>
+  <!-- Quick Entry Bar -->
+  <div id="quickEntry" class="hidden" style="position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:400;width:min(600px,94vw);background:var(--surf);border-radius:var(--r);box-shadow:0 8px 32px rgba(0,0,0,.18);padding:1rem;border:1.5px solid var(--accent)">
+    <div style="font-size:.75rem;font-weight:600;color:var(--accent);margin-bottom:.4rem"><i class="fas fa-bolt"></i> ENTRADA RÁPIDA  <kbd style="font-size:.68rem;background:var(--bg-s);padding:1px 5px;border-radius:4px;color:var(--txt2)">Esc para fechar</kbd></div>
+    <div style="display:flex;gap:6px">
+      <input type="text" id="quickInput" class="form-inp" placeholder="+150 alimentação almoço  |  -89.90 spotify" style="flex:1" oninput="renderQuickPreview(this.value)" onkeydown="if(event.key==='Enter')submitQuickEntry();if(event.key==='Escape')closeQuickEntry()" aria-label="Entrada rápida de transação"/>
+      <button class="btn btn-primary" onclick="submitQuickEntry()" aria-label="Registrar"><i class="fas fa-check"></i></button>
+    </div>
+    <div id="quickPreview" style="margin-top:.5rem;min-height:24px;font-size:.83rem"></div>
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <div class="sb-brand-icon"><i class="fas fa-chart-pie"></i></div>
+      <span class="sb-brand-name">FinancePro</span>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-section">Principal</div>
+      <button class="nav-item active" data-page="dashboard"><span class="ni"><i class="fas fa-home"></i></span>Dashboard</button>
+      <button class="nav-item" data-page="transactions"><span class="ni"><i class="fas fa-exchange-alt"></i></span>Transações</button>
+      <button class="nav-item" data-page="accounts"><span class="ni"><i class="fas fa-wallet"></i></span>Contas</button>
+      <div class="sb-section">Planejamento</div>
+      <button class="nav-item" data-page="categories"><span class="ni"><i class="fas fa-tags"></i></span>Categorias</button>
+      <button class="nav-item" data-page="budgets"><span class="ni"><i class="fas fa-bullseye"></i></span>Orçamentos</button>
+      <button class="nav-item" data-page="goals"><span class="ni"><i class="fas fa-star"></i></span>Metas</button>
+      <button class="nav-item" data-page="subscriptions"><span class="ni"><i class="fas fa-credit-card"></i></span>Assinaturas</button>
+      <div class="sb-section">Análise</div>
+      <button class="nav-item" data-page="reports"><span class="ni"><i class="fas fa-chart-bar"></i></span>Relatórios</button>
+      <button class="nav-item" data-page="forecast"><span class="ni"><i class="fas fa-chart-line"></i></span>Projeção</button>
+      <button class="nav-item" data-page="calculator"><span class="ni"><i class="fas fa-calculator"></i></span>Calculadora</button>
+      <button class="nav-item" data-page="patrimony"><span class="ni"><i class="fas fa-balance-scale"></i></span>Patrimônio</button>
+      <button class="nav-item" data-page="split"><span class="ni"><i class="fas fa-users"></i></span>Dividir Conta</button>
+      <button class="nav-item" data-page="import"><span class="ni"><i class="fas fa-file-import"></i></span>Importar CSV</button>
+      <button class="nav-item" data-page="calendar"><span class="ni"><i class="fas fa-calendar-alt"></i></span>Calendário</button>
+      <button class="nav-item" data-page="loans"><span class="ni"><i class="fas fa-handshake"></i></span>Empréstimos</button>
+      <button class="nav-item" data-page="cashflow"><span class="ni"><i class="fas fa-water"></i></span>Fluxo de Caixa</button>
+      <button class="nav-item" data-page="compare"><span class="ni"><i class="fas fa-balance-scale-right"></i></span>Comparar Meses</button>
+      <button class="nav-item" data-page="debts"><span class="ni"><i class="fas fa-file-invoice-dollar"></i></span>Dívidas</button>
+      <button class="nav-item" data-page="controle" style="border:1px solid rgba(16,185,129,.25);border-radius:8px;margin:2px 0;background:rgba(16,185,129,.04)"><span class="ni"><i class="fas fa-layer-group" style="color:var(--accent)"></i></span><strong style="color:var(--accent)">Controle Financeiro</strong></button>
+      <div class="sb-section">Inteligência</div>
+      <button class="nav-item" data-page="simulator" onclick="navigate('simulator')"><span class="ni"><i class="fas fa-flask"></i></span>Simulador</button>
+      <button class="nav-item" data-page="challenges" onclick="navigate('challenges')"><span class="ni"><i class="fas fa-trophy"></i></span>Desafios</button>
+      <button class="nav-item" data-page="anomalies" onclick="navigate('anomalies')"><span class="ni"><i class="fas fa-shield-alt"></i></span>Fraudes & Anomalias</button>
+      <button class="nav-item" data-page="education" onclick="navigate('education')"><span class="ni"><i class="fas fa-graduation-cap"></i></span>Educação Financeira</button>
+      <button class="nav-item" data-page="benchmark" onclick="navigate('benchmark')"><span class="ni"><i class="fas fa-chart-pie"></i></span>Benchmark Nacional</button>
+    </nav>
+    <div class="sb-footer">
+      <button class="nav-item" data-page="help"><span class="ni"><i class="fas fa-question-circle"></i></span>Ajuda & Tutorial</button>
+      <button class="nav-item" data-page="settings"><span class="ni"><i class="fas fa-cog"></i></span>Configurações</button>
+      <div class="sb-user">
+        <div class="sb-avatar" id="sbAvatar">U</div>
+        <div style="flex:1;min-width:0">
+          <div class="sb-uname" id="sbName">Usuário</div>
+          <div class="sb-urole">Conta pessoal</div>
+        </div>
+        <button class="sb-logout" onclick="doLogout()" title="Sair"><i class="fas fa-sign-out-alt"></i></button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main area -->
+  <main class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-left" id="breadcrumb"><i class="fas fa-home"></i> Dashboard</div>
+      <div class="topbar-right">
+        <div class="global-search">
+          <i class="fas fa-search"></i>
+          <input type="text" id="globalSearchInput" placeholder="Pesquisar..." oninput="onGlobalSearch(this.value)"/>
+          <kbd>Ctrl K</kbd>
+        </div>
+        <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Tema"><i class="fas fa-moon"></i></button>
+        <button class="icon-btn notif-btn" onclick="toggleNotifPanel()" aria-label="Notificações">
+          <i class="fas fa-bell"></i>
+          <span class="notif-badge hidden" id="notifBadge">0</span>
+        </button>
+        <div id="activityIndicator" style="display:flex;align-items:center;gap:.45rem;margin-left:.5rem" title="Nenhuma atividade">
+          <span id="activityDot" style="width:10px;height:10px;border-radius:50%;background:transparent;border:1px solid rgba(0,0,0,0.08);display:inline-block;box-shadow:0 0 0 3px transparent"></span>
+          <span id="activityCount" style="font-size:.78rem;color:var(--txt2);display:none">0</span>
+        </div>
+        <!-- Global progress bar -->
+        <div id="globalProgress" style="display:flex;flex-direction:column;align-items:flex-end;margin-left:.75rem;min-width:220px">
+          <div id="globalProgressLabel" style="font-size:.78rem;color:var(--txt2);white-space:nowrap"></div>
+          <div style="width:220px;height:6px;background:var(--bdr);border-radius:6px;overflow:hidden;margin-top:4px">
+            <div id="globalProgressBar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-d));transition:width .2s ease"></div>
+          </div>
+        </div>
+        <!-- Task panel toggle -->
+        <button class="icon-btn" onclick="document.getElementById('taskPanel').classList.toggle('open')" title="Tarefas em background"><i class="fas fa-tasks"></i></button>
+      </div>
+    </div>
+
+    <!-- Search results dropdown -->
+    <div id="searchResults" class="hidden" style="position:absolute;top:68px;left:50%;transform:translateX(-50%);width:460px;background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r-md);box-shadow:var(--shadow-lg);z-index:150;max-height:320px;overflow-y:auto"></div>
+
+    <!-- Notification panel -->
+    <div id="notifPanel" class="hidden" style="position:absolute;top:68px;right:1.5rem;width:300px;background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r-md);box-shadow:var(--shadow-lg);z-index:150">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-bottom:1px solid var(--bdr)">
+        <strong style="font-size:.9rem">Notificações</strong>
+        <button class="link-btn" onclick="markAllRead()" style="font-size:.78rem">Marcar tudo lido</button>
+      </div>
+      <div id="notifList" style="max-height:280px;overflow-y:auto">
+        <div class="empty-state" style="padding:2rem"><div class="empty-icon"><i class="fas fa-check-circle"></i></div><p class="empty-text">Tudo em dia!</p></div>
+      </div>
+    </div>
+
+    <!-- Pages -->
+    <div class="pages">
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-hdr">
+          <div><h1 class="page-title" id="dashGreeting">Olá!</h1><p class="page-sub" id="dashDate"></p></div>
+          <div class="hdr-actions">
+            <div class="period-filter">
+              <button class="period-btn active" data-period="month" onclick="setDashPeriod('month')">Mês</button>
+              <button class="period-btn" data-period="quarter" onclick="setDashPeriod('quarter')">Trimestre</button>
+              <button class="period-btn" data-period="year" onclick="setDashPeriod('year')">Ano</button>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="openAIAssistant()" title="Assistente IA" id="dashAIBtn"><i class="fas fa-robot"></i></button>
+            <button class="btn btn-ghost btn-sm" onclick="openDashCustomizer()" title="Personalizar dashboard" aria-label="Personalizar"><i class="fas fa-sliders-h"></i></button>
+            <button class="btn btn-primary" onclick="openTxModal()"><i class="fas fa-plus"></i> Nova transação</button>
+          </div>
+        </div>
+        <!-- Duplicate + Trend Alerts -->
+        <div id="duplicateAlerts"></div>
+        <div id="trendAlerts"></div>
+        <!-- Dashboard customizer -->
+        <div id="dashCustomizer" class="hidden" style="background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r);padding:1rem;margin-bottom:1rem">
+          <div style="font-size:.82rem;font-weight:600;margin-bottom:.5rem"><i class="fas fa-sliders-h"></i> Personalizar widgets</div>
+          <div id="dashCustomizerContent" style="display:flex;flex-wrap:wrap;gap:.5rem 1.5rem"></div>
+        </div>
+        <div class="stats-grid" id="dashStats">
+          <div class="stat-card skel" style="min-height:88px"></div>
+          <div class="stat-card skel" style="min-height:88px"></div>
+          <div class="stat-card skel" style="min-height:88px"></div>
+          <div class="stat-card skel" style="min-height:88px"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem">
+          <div class="card"><div class="card-hdr"><span class="card-title">🏆 Score Financeiro</span><button class="btn btn-ghost btn-xs" onclick="renderFinancialScore()" aria-label="Atualizar score"><i class="fas fa-sync"></i></button></div><div id="dashScore"><div class="empty-state" style="padding:1rem"><p class="empty-text" style="font-size:.78rem">Calculando...</p></div></div></div>
+          <div class="card" id="dashWeather"><div class="card-hdr"><span class="card-title">Clima dos Gastos</span></div><div id="spendingWeather" style="padding:.75rem 0"></div></div>
+        </div>
+        <div class="charts-row" id="dashCharts">
+          <div class="card"><div class="card-hdr"><span class="card-title">Despesas por Categoria</span></div><div class="chart-wrap" style="min-height:220px"><canvas id="dashPie"></canvas></div></div>
+          <div class="card"><div class="card-hdr"><span class="card-title">Saldo — últimos 6 meses</span></div><div class="chart-wrap" style="min-height:220px"><canvas id="dashLine"></canvas></div></div>
+        </div>
+        <div class="dash-bottom">
+          <div class="card"><div class="card-hdr"><span class="card-title">Gastos — Últimos 7 dias</span></div><div class="chart-wrap" style="min-height:180px"><canvas id="dashBar"></canvas></div></div>
+          <div class="card"><div class="card-hdr"><span class="card-title">Assinaturas Próximas</span><button class="link-btn" onclick="navigate('subscriptions')">Ver todas</button></div><div id="dashSubs"></div></div>
+          <div class="card"><div class="card-hdr"><span class="card-title">Status dos Orçamentos</span><button class="link-btn" onclick="navigate('budgets')">Ver todos</button></div><div id="dashBudgets"><div class="empty-state" style="padding:1.5rem"><div class="empty-icon"><i class="fas fa-bullseye"></i></div><p class="empty-text">Carregando...</p></div>
+        <div class="card" id="dashGoalsPreview" style="margin-bottom:1rem">
+          <div class="card-hdr"><span class="card-title"><i class="fas fa-star"></i> Metas ativas</span><button class="btn btn-ghost btn-sm" onclick="navigate('goals')">Ver todas</button></div>
+          <div id="dashGoalsPreviewList"><p style="font-size:.82rem;color:var(--txt2);padding:.5rem 0">Carregando...</p></div>
+        </div>
+</div></div>
+          <div class="card"><div class="card-hdr"><span class="card-title">Últimas Transações</span><button class="link-btn" onclick="navigate('transactions')">Ver todas</button></div><div id="dashRecent"><div class="empty-state" style="padding:1.5rem"><div class="empty-icon"><i class="fas fa-receipt"></i></div><p class="empty-text">Carregando...</p></div></div></div>
+
+        <!-- SUGESTÕES IA PROATIVAS -->
+        <div class="card" id="dashSuggestionsCard" style="margin-top:1rem">
+          <div class="card-hdr" style="margin-bottom:.5rem">
+            <span class="card-title">
+              <i class="fas fa-lightbulb" style="color:#F59E0B"></i> Sugestões da IA
+              <span id="suggCount" style="font-size:.68rem;padding:1px 7px;border-radius:99px;background:#FFFBEB;color:#92400E;margin-left:6px;font-weight:500;display:none"></span>
+            </span>
+            <button class="btn btn-ghost btn-sm" onclick="refreshSuggestions()" title="Atualizar sugestões">
+              <i class="fas fa-sync-alt" style="font-size:.75rem"></i>
+            </button>
+          </div>
+          <div id="aiSuggestionsPanel">
+            <div style="font-size:.78rem;color:var(--txt2);padding:.4rem 0">
+              <i class="fas fa-spinner fa-spin"></i> Analisando seus dados...
+            </div>
+          </div>
+        </div>
+
+        <!-- ASSISTENTE IA FINANCEIRO -->
+        <div class="card" id="dashAIAssistant" style="margin-top:1rem;display:none">
+          <div class="card-hdr" style="margin-bottom:.6rem">
+            <span class="card-title">
+              <i class="fas fa-robot" style="color:var(--accent)"></i> Assistente IA
+              <span id="aiAssistBadge" style="font-size:.68rem;padding:1px 7px;border-radius:99px;background:#E1F5EE;color:#085041;margin-left:6px;font-weight:500">ativo</span>
+            </span>
+            <button class="btn btn-ghost btn-sm" onclick="toggleAIAssistant()" title="Fechar"><i class="fas fa-times"></i></button>
+          </div>
+          <!-- Mensagens -->
+          <div id="aiChatMsgs" style="max-height:280px;overflow-y:auto;margin-bottom:.65rem;display:flex;flex-direction:column;gap:.45rem"></div>
+          <!-- Sugestões rápidas - sempre visíveis -->
+          <div id="aiSuggestions" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:.65rem">
+            <button class="btn btn-outline btn-sm" style="font-size:.72rem" onclick="askAI('Quanto gastei este mês?')">💸 Gastos do mês</button>
+            <button class="btn btn-outline btn-sm" style="font-size:.72rem" onclick="askAI('Como está minha poupança?')">💰 Poupança</button>
+            <button class="btn btn-outline btn-sm" style="font-size:.72rem" onclick="askAI('Onde posso economizar?')">✂️ Economizar</button>
+            <button class="btn btn-outline btn-sm" style="font-size:.72rem" onclick="askAI('Compare este mês com o anterior')">📊 Comparar meses</button>
+            <button class="btn btn-outline btn-sm" style="font-size:.72rem" onclick="askAI('Minhas maiores despesas?')">🔝 Top despesas</button>
+            <button class="btn btn-outline btn-sm" style="font-size:.72rem" onclick="askAI('Previsão para o fim do mês?')">🔮 Previsão</button>
+            <button class="btn btn-outline btn-sm" style="font-size:.72rem" onclick="askAI('Minhas metas?')">🎯 Metas</button>
+            <button class="btn btn-outline btn-sm" style="font-size:.72rem" onclick="askAI('Status dos orçamentos?')">📋 Orçamentos</button>
+            <button class="btn btn-outline btn-sm" style="font-size:.72rem" onclick="navigate('settings')" title="Gerenciar modelo de IA local"><i class="fas fa-brain"></i> Modelo IA</button>
+          </div>
+          <!-- Input -->
+          <div style="display:flex;gap:7px">
+            <input type="text" id="aiChatInput" class="form-inp"
+              placeholder="Pergunte sobre gastos, receitas, metas, categorias..."
+              style="flex:1;font-size:.83rem"
+              onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAIChat();}">
+            <button class="btn btn-primary btn-sm" onclick="sendAIChat()" id="aiSendBtn" style="flex-shrink:0;padding:0 12px">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+
+        </div>
+      </div>
+
+      <!-- TRANSACTIONS -->
+      <div class="page" id="page-transactions">
+        <div class="page-hdr">
+          <div><h1 class="page-title">Transações</h1><p class="page-sub" id="txSummary"></p></div>
+          <div class="hdr-actions">
+            <button class="btn btn-outline" onclick="navigate('import')"><i class="fas fa-file-import"></i> Importar</button>
+            <button class="btn btn-outline" onclick="exportTxCSV()"><i class="fas fa-download"></i> CSV</button>
+            <button id="txCompactBtn" class="btn btn-outline btn-sm" onclick="toggleTxCompact()" title="Alternar modo compacto" aria-label="Modo compacto"><i class="fas fa-compress-alt"></i> Compacto</button>
+            <button class="btn btn-primary" onclick="openTxModal()"><i class="fas fa-plus"></i> Nova</button>
+          </div>
+        </div>
+        <div class="card" style="padding:1rem;margin-bottom:1rem">
+          <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center">
+            <div class="inp-wrap" style="flex:1;min-width:160px"><i class="fas fa-search inp-icon"></i><input type="text" id="txSearch" class="form-inp" placeholder="Pesquisar..." oninput="debounceTxFilter()"/></div>
+            <input type="date" id="txStart" class="form-inp" style="width:auto" onchange="loadTxList()"/>
+            <input type="date" id="txEnd" class="form-inp" style="width:auto" onchange="loadTxList()"/>
+            <select id="txTypeFilter" class="form-inp" style="width:auto" onchange="loadTxList()">
+              <option value="">Todos os tipos</option><option value="expense">Despesas</option><option value="income">Receitas</option><option value="transfer">Transferências</option>
+            </select>
+            <select id="txCatFilter" class="form-inp" style="width:auto" onchange="loadTxList()">
+              <option value="">Todas categorias</option>
+            </select>
+            <select id="txAccFilter" class="form-inp" style="width:auto" onchange="loadTxList()">
+              <option value="">Todas as contas</option>
+            </select>
+            <select id="txSort" class="form-inp" style="width:auto" onchange="loadTxList()">
+              <option value="date-desc">Data ↓</option><option value="date-asc">Data ↑</option><option value="amount-desc">Valor ↓</option><option value="amount-asc">Valor ↑</option>
+            </select>
+            <button class="btn btn-ghost btn-sm" onclick="clearTxFilters()" title="Limpar filtros"><i class="fas fa-times"></i></button>
+          </div>
+          <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.5rem">
+            <button class="btn btn-ghost btn-xs preset-btn" data-preset="today" onclick="setDatePreset('today')">Hoje</button>
+            <button class="btn btn-ghost btn-xs preset-btn" data-preset="week" onclick="setDatePreset('week')">7 dias</button>
+            <button class="btn btn-ghost btn-xs preset-btn" data-preset="month" onclick="setDatePreset('month')">Este mês</button>
+            <button class="btn btn-ghost btn-xs preset-btn" data-preset="lastmonth" onclick="setDatePreset('lastmonth')">Mês anterior</button>
+            <button class="btn btn-ghost btn-xs preset-btn" data-preset="year" onclick="setDatePreset('year')">Este ano</button>
+          </div>
+          <div id="txBulkBar" class="hidden" style="display:flex;align-items:center;gap:.6rem;margin-top:.6rem;padding-top:.6rem;border-top:1px solid var(--bdr)">
+            <span id="txSelectedCount" style="font-size:.83rem;color:var(--txt2)"></span>
+            <button class="btn btn-danger btn-sm" onclick="bulkDeleteTx()"><i class="fas fa-trash"></i> Excluir</button>
+            <button class="btn btn-outline btn-sm" onclick="bulkExportTx()"><i class="fas fa-download"></i> Exportar</button>
+            <button class="btn btn-ghost btn-sm" onclick="clearTxSelection()">Cancelar</button>
+          </div>
+        </div>
+        <div class="card">
+          <div id="smartRecurringAlert"></div>
+          <div class="table-wrap">
+            <table class="table" id="txTable">
+              <thead><tr>
+                <th style="width:40px"><input type="checkbox" id="txSelectAll" onchange="toggleSelectAll(this.checked)"/></th>
+                <th>Data</th><th>Descrição</th><th>Categoria</th><th>Conta</th><th>Valor</th><th>Ações</th>
+              </tr></thead>
+              <tbody id="txTableBody"></tbody>
+            </table>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border-top:1px solid var(--bdr)">
+            <span id="txCountLbl" style="font-size:.82rem;color:var(--txt2)"></span>
+            <button class="btn btn-ghost btn-sm" id="txLoadMoreBtn" onclick="loadMoreTx()" style="display:none"><i class="fas fa-chevron-down"></i> Carregar mais</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACCOUNTS -->
+      <div class="page" id="page-accounts">
+        <div class="page-hdr">
+          <h1 class="page-title">Contas</h1>
+          <button class="btn btn-primary" onclick="openAccountModal()"><i class="fas fa-plus"></i> Nova conta</button>
+        </div>
+        <div class="accounts-grid" id="accountsGrid"></div>
+        <div class="card"><div class="card-hdr"><span class="card-title">Transferências recentes</span><button class="btn btn-outline btn-sm" onclick="openTxModal('transfer')"><i class="fas fa-arrows-alt-h"></i> Nova</button></div><div id="transferList"></div></div>
+      </div>
+
+      <!-- CATEGORIES -->
+      <div class="page" id="page-categories">
+        <div class="page-hdr"><h1 class="page-title">Categorias</h1><button class="btn btn-primary" onclick="openCatModal()"><i class="fas fa-plus"></i> Nova</button></div>
+        <div class="cats-grid">
+          <div class="card"><div class="card-hdr"><span class="card-title text-danger"><i class="fas fa-arrow-down"></i> Despesas</span></div><div id="catExpenseList"></div></div>
+          <div class="card"><div class="card-hdr"><span class="card-title text-success"><i class="fas fa-arrow-up"></i> Receitas</span></div><div id="catIncomeList"></div></div>
+        </div>
+        <!-- Category Health Scores -->
+        <div class="card" style="margin-top:1rem">
+          <div class="card-hdr">
+            <span class="card-title"><i class="fas fa-heartbeat"></i> Score de saúde por categoria</span>
+            <span style="font-size:.72rem;color:var(--txt2)">Baseado em 3 meses</span>
+          </div>
+          <div id="catHealthGrid"></div>
+        </div>
+      </div>
+
+      <!-- BUDGETS — redireciona para Orçamento Pro -->
+      <div class="page" id="page-budgets">
+        <div class="page-hdr">
+          <div><h1 class="page-title">Orçamentos</h1><p class="page-sub">Controle seus limites mensais — <a href="#" onclick="navigate('controle');return false;" style="color:var(--accent);text-decoration:none"><i class="fas fa-chart-pie"></i> Controle Avançado</a></p></div>
+          <div class="hdr-actions">
+            <button class="btn btn-outline" onclick="copyBudgetFromPrev()"><i class="fas fa-copy"></i> Copiar mês anterior</button>
+            <input type="month" id="budgetMonth" class="form-inp" style="width:auto" onchange="loadBudgets()"/>
+          </div>
+        </div>
+
+        <div class="card" style="padding:1.1rem;margin-bottom:1rem" id="budgetTotalCard"></div>
+        <div id="budgetInsightBanner"></div>
+        <div id="budgetsGrid"></div>
+      </div>
+
+      <!-- GOALS -->
+      <div class="page" id="page-goals">
+        <div class="page-hdr">
+          <div>
+            <h1 class="page-title">🌟 Metas &amp; Sonhos</h1>
+            <p class="page-sub">Defina um objetivo — o sistema cria um plano personalizado</p>
+          </div>
+          <div class="hdr-actions">
+            <button class="btn btn-primary" onclick="openGoalModal()"><i class="fas fa-plus"></i> Nova meta</button>
+          </div>
+        </div>
+        <div class="stats-grid" id="goalsKpis" style="margin-bottom:1.25rem"></div>
+        <div id="goalsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.25rem"></div>
+      </div>
+
+      <!-- SUBSCRIPTIONS -->
+      <div class="page" id="page-subscriptions">
+        <div class="page-hdr">
+          <div><h1 class="page-title">Assinaturas</h1><p class="page-sub">Total mensal: <strong id="subsTotalLbl">—</strong></p></div>
+          <button class="btn btn-primary" onclick="openSubModal()"><i class="fas fa-plus"></i> Nova assinatura</button>
+        </div>
+        <div class="subs-grid" id="subsGrid"></div>
+      </div>
+
+      <!-- REPORTS -->
+      <div class="page" id="page-reports">
+        <div class="page-hdr">
+          <h1 class="page-title">Relatórios</h1>
+          <div class="hdr-actions">
+            <select id="reportPeriod" class="form-inp" style="width:auto" onchange="loadReports()">
+              <option value="30">Últimos 30 dias</option><option value="90" selected>Últimos 90 dias</option><option value="180">Últimos 6 meses</option><option value="365">Este ano</option>
+            </select>
+            <button class="btn btn-outline" onclick="exportTxCSV()"><i class="fas fa-file-csv"></i> CSV</button>
+            <button class="btn btn-outline" onclick="exportExcel()"><i class="fas fa-file-excel"></i> Excel</button>
+            <button class="btn btn-outline" onclick="exportPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+          </div>
+        </div>
+        <div class="reports-grid">
+          <div class="card report-full"><div class="card-hdr"><span class="card-title">Receitas vs Despesas por mês</span><button class="btn btn-ghost btn-xs" onclick="downloadChart('rChart1')"><i class="fas fa-download"></i></button></div><div class="chart-wrap" style="min-height:260px"><canvas id="rChart1"></canvas></div></div>
+          <div class="card"><div class="card-hdr"><span class="card-title">Distribuição de Despesas</span><button class="btn btn-ghost btn-xs" onclick="downloadChart('rChart2')"><i class="fas fa-download"></i></button></div><div class="chart-wrap" style="min-height:220px"><canvas id="rChart2"></canvas></div></div>
+          <div class="card"><div class="card-hdr"><span class="card-title">Top Categorias</span><button class="btn btn-ghost btn-xs" onclick="downloadChart('rChart3')"><i class="fas fa-download"></i></button></div><div class="chart-wrap" style="min-height:220px"><canvas id="rChart3"></canvas></div></div>
+          <div class="card report-full"><div class="card-hdr"><span class="card-title">Mapa de Calor de Gastos</span></div><div id="heatmap" style="padding:1rem;overflow-x:auto"></div></div>
+          <div class="card report-full"><div class="card-hdr"><span class="card-title">📊 Regra 50/30/20 — Análise do Mês</span></div><div id="report5030" style="padding:.25rem .5rem"><p style="font-size:.85rem;color:var(--txt2);padding:.5rem">Carregando análise...</p></div></div>
+        </div>
+        <!-- 50/30/20 Historical -->
+        <div class="card" style="margin-top:1rem">
+          <div class="card-hdr">
+            <span class="card-title"><i class="fas fa-balance-scale"></i> Regra 50/30/20 — Histórico 6 meses</span>
+          </div>
+          <div style="min-height:220px;position:relative"><canvas id="rule5020Chart"></canvas></div>
+          <div id="rule5020Ideal" style="padding:.75rem 0;border-top:1px solid var(--bdr);margin-top:.75rem"></div>
+        </div>
+
+        <!-- Weekday Heatmap -->
+        <div class="card" style="margin-top:1rem">
+          <div class="card-hdr">
+            <span class="card-title"><i class="fas fa-calendar-week"></i> Gastos por dia da semana</span>
+            <span style="font-size:.72rem;color:var(--txt2)">Média histórica</span>
+          </div>
+          <div id="weekdayHeatmap"></div>
+        </div>
+
+        <!-- National Comparison -->
+        <div class="card" style="margin-top:1rem">
+          <div class="card-hdr">
+            <span class="card-title"><i class="fas fa-globe-americas"></i> Comparativo com médias nacionais</span>
+            <button class="btn btn-ghost btn-sm" onclick="renderNationalComparison()"><i class="fas fa-sync"></i></button>
+          </div>
+          <div id="nationalCompGrid"></div>
+        </div>
+
+      </div>
+
+      <!-- FORECAST -->
+      <div class="page" id="page-forecast">
+        <div class="page-hdr">
+          <div><h1 class="page-title">Projeção Financeira</h1><p class="page-sub">Estimativa de saldo futuro baseada no histórico</p></div>
+          <div class="period-filter">
+            <button class="period-btn active" data-fdays="30" onclick="loadForecast(30)">30 dias</button>
+            <button class="period-btn" data-fdays="60" onclick="loadForecast(60)">60 dias</button>
+            <button class="period-btn" data-fdays="90" onclick="loadForecast(90)">90 dias</button>
+          </div>
+        </div>
+        <div class="stats-grid" id="forecastKpis" style="grid-template-columns:repeat(3,1fr)"></div>
+        <div class="card" style="margin-bottom:1rem"><div class="card-hdr"><span class="card-title">Saldo projetado dia a dia</span></div><div class="chart-wrap" style="min-height:280px"><canvas id="forecastChart"></canvas></div></div>
+        <div class="forecast-bottom">
+          <div class="card"><div class="card-hdr"><span class="card-title">Receitas previstas</span></div><div id="forecastIncoming"></div></div>
+          <div class="card"><div class="card-hdr"><span class="card-title">Despesas previstas</span></div><div id="forecastOutgoing"></div></div>
+        </div>
+      </div>
+
+      <!-- CALCULATOR -->
+      <div class="page" id="page-calculator">
+        <div class="page-hdr"><h1 class="page-title">Calculadora Financeira</h1><p class="page-sub">Simule juros, parcelas e investimentos</p></div>
+        <div class="auth-tabs" style="max-width:520px;margin-bottom:1rem" id="calcTabs">
+          <button class="auth-tab active" onclick="showCalcTab('compound',this)">Juros Compostos</button>
+          <button class="auth-tab" onclick="showCalcTab('installment',this)">Parcelamento</button>
+          <button class="auth-tab" onclick="showCalcTab('invest',this)">Investimento</button>
+        </div>
+        <div class="calc-grid">
+          <div>
+            <!-- Compound -->
+            <div id="calcCompound" class="card card-body" style="display:flex;flex-direction:column;gap:.75rem">
+              <h3>Juros Compostos</h3>
+              <div class="form-group"><label class="form-label">Capital inicial (R$)</label><input type="number" id="ciP" class="form-inp" value="1000"/></div>
+              <div class="form-group"><label class="form-label">Taxa (% ao mês)</label><input type="number" id="ciR" class="form-inp" value="1" step="0.01"/></div>
+              <div class="form-group"><label class="form-label">Período (meses)</label><input type="number" id="ciN" class="form-inp" value="12"/></div>
+              <div class="form-group"><label class="form-label">Aporte mensal (R$)</label><input type="number" id="ciM" class="form-inp" value="0"/></div>
+              <button class="btn btn-primary" onclick="calcCompound()"><i class="fas fa-calculator"></i> Calcular</button>
+              <div id="ciResult" class="hidden calc-result"></div>
+            </div>
+            <!-- Installment -->
+            <div id="calcInstallment" class="card card-body hidden" style="display:flex;flex-direction:column;gap:.75rem">
+              <h3>Parcelamento</h3>
+              <div class="form-group"><label class="form-label">Valor total (R$)</label><input type="number" id="instV" class="form-inp" value="1000"/></div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Parcelas</label><input type="number" id="instN" class="form-inp" value="12" min="1"/></div>
+                <div class="form-group"><label class="form-label">Taxa (% a.m.)</label><input type="number" id="instR" class="form-inp" value="0" step="0.01"/></div>
+              </div>
+              <div class="form-group"><label class="form-label">Sistema</label>
+                <select id="instSys" class="form-inp"><option value="price">Price (parcelas iguais)</option><option value="sac">SAC (amortização constante)</option><option value="simple">Sem juros</option></select>
+              </div>
+              <button class="btn btn-primary" onclick="calcInstallment()"><i class="fas fa-calculator"></i> Calcular</button>
+              <div id="instResult" class="hidden calc-result"></div>
+            </div>
+            <!-- Invest -->
+            <div id="calcInvest" class="card card-body hidden" style="display:flex;flex-direction:column;gap:.75rem">
+              <h3>Simulador de Investimento</h3>
+              <div class="form-group"><label class="form-label">Valor inicial (R$)</label><input type="number" id="invP" class="form-inp" value="500"/></div>
+              <div class="form-group"><label class="form-label">Aporte mensal (R$)</label><input type="number" id="invM" class="form-inp" value="300"/></div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Rentabilidade (% a.m.)</label><input type="number" id="invR" class="form-inp" value="1" step="0.01"/></div>
+                <div class="form-group"><label class="form-label">Período (anos)</label><input type="number" id="invY" class="form-inp" value="10" min="1" max="50"/></div>
+              </div>
+              <button class="btn btn-primary" onclick="calcInvest()"><i class="fas fa-calculator"></i> Simular</button>
+              <div id="invResult" class="hidden calc-result"></div>
+            </div>
+          </div>
+          <div class="card"><div class="card-hdr"><span class="card-title" id="calcChartTitle">Gráfico</span></div>
+            <div style="padding:1rem;min-height:280px;display:flex;align-items:center;justify-content:center" id="calcChartBox">
+              <p style="color:var(--txt3);font-size:.85rem">Calcule para ver o gráfico</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PATRIMONY -->
+      <div class="page" id="page-patrimony">
+        <div class="page-hdr">
+          <div><h1 class="page-title">Balanço Patrimonial</h1><p class="page-sub">Ativos × Passivos → Patrimônio Líquido</p></div>
+          <div class="hdr-actions">
+            <button class="btn btn-outline" onclick="openPatModal('asset')"><i class="fas fa-plus"></i> Ativo</button>
+            <button class="btn btn-outline" style="color:var(--danger);border-color:rgba(239,68,68,.3)" onclick="openPatModal('liability')"><i class="fas fa-plus"></i> Passivo</button>
+          </div>
+        </div>
+        <div class="stats-grid" id="patrimonyKpis" style="grid-template-columns:repeat(3,1fr)"></div>
+        <div class="pat-grid">
+          <div class="card" style="margin-bottom:1rem"><div class="card-hdr"><span class="card-title"><i class="fas fa-chart-line"></i> Evolução do Patrimônio</span></div><div style="min-height:220px;position:relative"><canvas id="patrimonyEvolutionChart"></canvas></div></div>
+          <div class="card"><div class="card-hdr"><span class="card-title text-success"><i class="fas fa-plus-circle"></i> Ativos</span></div><div id="assetsList"></div></div>
+          <div class="card"><div class="card-hdr"><span class="card-title text-danger"><i class="fas fa-minus-circle"></i> Passivos</span></div><div id="liabsList"></div></div>
+        </div>
+      </div>
+
+      <!-- SPLIT -->
+      <div class="page" id="page-split">
+        <div class="page-hdr">
+          <div><h1 class="page-title">Dividir Despesas</h1><p class="page-sub">Controle quem deve quanto</p></div>
+          <button class="btn btn-primary" onclick="openSplitModal()"><i class="fas fa-plus"></i> Nova divisão</button>
+        </div>
+        <div class="stats-grid" id="splitKpis" style="grid-template-columns:repeat(3,1fr)"></div>
+        <div id="splitList"></div>
+      </div>
+
+      <!-- IMPORT -->
+            <!-- CALENDAR PAGE -->
+      <div class="page" id="page-calendar">
+        <!-- Header com navegação de mês -->
+        <div class="page-hdr" style="margin-bottom:.75rem">
+          <h1 class="page-title">Calendário Financeiro</h1>
+          <div class="hdr-actions">
+            <button class="btn btn-ghost btn-sm" onclick="calNav(-1)" title="Mês anterior" aria-label="Mês anterior">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <span id="calendarHeader" style="font-weight:700;font-family:Outfit,sans-serif;min-width:180px;text-align:center;font-size:1rem;text-transform:capitalize"></span>
+            <button class="btn btn-ghost btn-sm" onclick="calNav(1)" title="Próximo mês" aria-label="Próximo mês">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+            <button class="btn btn-outline btn-sm" onclick="S.calendarDate=new Date();loadCalendar()" title="Hoje" aria-label="Ir para hoje">
+              Hoje
+            </button>
+          </div>
+        </div>
+
+        <!-- Resumo do mês -->
+        <div id="calendarSummary" style="display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1rem"></div>
+
+        <!-- Grid principal: calendário + painel de detalhe -->
+        <div style="display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:start">
+          <!-- Calendário -->
+          <div class="card" style="min-width:0;overflow:hidden;padding:1rem">
+            <div id="calendarGrid"></div>
+          </div>
+
+          <!-- Painel de detalhe do dia (colapsável) -->
+          <div id="calDayPanel" class="hidden" style="width:300px;flex-shrink:0;display:none">
+            <div class="card" style="position:sticky;top:80px">
+              <div class="card-hdr" style="padding-bottom:.75rem;border-bottom:1px solid var(--bdr);margin-bottom:.75rem">
+                <div>
+                  <div style="font-size:.7rem;color:var(--txt2);margin-bottom:2px;text-transform:uppercase;letter-spacing:.5px">Transações do dia</div>
+                  <div id="calDayDate" style="font-size:1rem;font-weight:700;font-family:Outfit,sans-serif"></div>
+                </div>
+                <button class="btn btn-ghost btn-sm" onclick="closeCalDayPanel()" aria-label="Fechar painel">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+              <div id="calDayList" style="max-height:400px;overflow-y:auto"></div>
+              <div style="padding-top:.75rem;border-top:1px solid var(--bdr);margin-top:.75rem">
+                <button class="btn btn-primary btn-sm" style="width:100%" onclick="openTxModalForDay()" aria-label="Adicionar transação neste dia">
+                  <i class="fas fa-plus"></i> Adicionar transação
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Legenda -->
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:.75rem;font-size:.72rem;color:var(--txt2)">
+          <span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--warning)"></span>Assinatura vencendo</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="color:var(--success);font-weight:600">+ verde</span> = receita</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="color:var(--danger);font-weight:600">- vermelho</span> = despesa</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="border:2px solid var(--accent);border-radius:5px;display:inline-block;width:12px;height:12px"></span>Hoje</span>
+        </div>
+      </div>
+
+
+      <!-- CASHFLOW PAGE -->
+      <div class="page" id="page-cashflow">
+        <div class="page-hdr">
+          <div><h1 class="page-title">Fluxo de Caixa</h1></div>
+          <div class="hdr-actions">
+            <input type="month" id="cashflowMonth" class="form-inp" style="width:auto" onchange="renderCashflowChart(this.value)"/>
+          </div>
+        </div>
+        <div class="card">
+          <div class="chart-wrap" style="min-height:300px"><canvas id="cashflowChart"></canvas></div>
+          <div id="cashflowSummary"></div>
+        </div>
+      </div>
+
+      <!-- COMPARE PAGE -->
+      <div class="page" id="page-compare">
+        <div class="page-hdr">
+          <div><h1 class="page-title">Comparar Meses</h1></div>
+          <div class="hdr-actions">
+            <input type="month" id="cmpMonth1" class="form-inp" style="width:auto" onchange="renderMonthComparison(this.value,$('cmpMonth2').value)"/>
+            <span style="font-weight:600;color:var(--txt2)">vs</span>
+            <input type="month" id="cmpMonth2" class="form-inp" style="width:auto" onchange="renderMonthComparison($('cmpMonth1').value,this.value)"/>
+          </div>
+        </div>
+        <div class="card"><div class="chart-wrap" style="min-height:260px"><canvas id="compareChart"></canvas></div></div>
+        <div class="card"><div class="table-wrap"><table class="table" id="compareTable"></table></div></div>
+      </div>
+
+      <!-- DEBTS PAGE -->
+      <div class="page" id="page-debts">
+        <div class="page-hdr">
+          <div><h1 class="page-title">Dívidas</h1><p class="page-sub">Total: <strong id="debtsTotalLbl" style="color:var(--danger)">R$ 0,00</strong></p></div>
+          <div class="hdr-actions"><button class="btn btn-primary" onclick="openDebtModal()"><i class="fas fa-plus"></i> Nova Dívida</button></div>
+        </div>
+        <div id="debtsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem"></div>
+      </div>
+
+      <!-- LOANS PAGE -->
+      <div class="page" id="page-loans">
+        <div class="page-hdr">
+          <div>
+            <h1 class="page-title">Empréstimos</h1>
+            <p class="page-sub">Controle dinheiro emprestado e recebido</p>
+          </div>
+          <div class="hdr-actions">
+            <button class="btn btn-primary" onclick="openLoanModal('given')"><i class="fas fa-arrow-right-from-bracket"></i> Emprestei a alguém</button>
+            <button class="btn btn-outline" onclick="openLoanModal('received')"><i class="fas fa-arrow-right-to-bracket"></i> Peguei emprestado</button>
+          </div>
+        </div>
+        <div class="stats-grid" id="loansKpis" style="margin-bottom:1.25rem"></div>
+        <div id="loansList"></div>
+      </div>
+
+      <!-- HELP / TUTORIAL PAGE -->
+      <div class="page" id="page-help">
+        <div class="page-hdr">
+          <div><h1 class="page-title">📖 Como usar o FinancePro</h1></div>
+        </div>
+        <div id="helpContent"></div>
+      </div>
+
+<div class="page" id="page-import">
+        <div class="page-hdr"><h1 class="page-title">Importar Extrato</h1><p class="page-sub">Suporte: Nubank, BB, Bradesco, Itaú, Inter, C6 e mais — <span id="aiStatusChip" style="font-size:.75rem;color:var(--info)"><i class="fas fa-brain"></i> IA local: <b id="aiDocsCount">0</b> tx aprendidas</span></p></div>
+        <div class="card" style="padding:1.25rem;margin-bottom:1rem">
+          <div id="importStep1">
+            <div class="drop-zone" id="dropZone" onclick="document.getElementById('importFileInput').click()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="onImportDrop(event)">
+              <i class="fas fa-file-import"></i>
+              <p style="font-weight:600;margin-bottom:4px">Arraste o arquivo aqui ou clique para selecionar</p>
+              <p>Formatos: CSV, OFX, QIF (Nubank, BB, Bradesco, Itaú, Inter, C6...)</p>
+              <p style="font-size:.75rem;color:var(--txt2);margin-top:4px">Agora com suporte a <strong>PDF de fatura</strong></p>
+              <input type="file" id="importFileInput" accept=".csv,.txt,.ofx,.qif,.pdf" hidden onchange="onImportFileOrPDF(this)"/>
+            </div>
+            <div class="form-row" style="margin-top:1rem">
+              <div class="form-group"><label class="form-label">Banco</label>
+                <select id="importBank" class="form-inp">
+                  <option value="auto">🔍 Detectar automaticamente</option>
+                  <optgroup label="── Nubank ──">
+                    <option value="nubank">Nubank Crédito (fatura)</option>
+                    <option value="nubank_account">Nubank Conta (NuConta)</option>
+                  </optgroup>
+                  <optgroup label="── Outros bancos ──">
+                    <option value="bb">Banco do Brasil</option>
+                    <option value="itau">Itaú</option>
+                    <option value="bradesco">Bradesco</option>
+                    <option value="inter">Inter</option>
+                    <option value="c6">C6 Bank</option>
+                    <option value="santander">Santander</option>
+                    <option value="caixa">Caixa Econômica</option>
+                  </optgroup>
+                  <optgroup label="── Formatos ──">
+                    <option value="ofx">OFX / XML</option>
+                    <option value="qif">QIF</option>
+                    <option value="generic">Genérico (CSV)</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div class="form-group"><label class="form-label">Conta destino</label>
+                <select id="importAccount" class="form-inp"></select>
+              </div>
+            </div>
+            <div id="importStatus" style="font-size:.85rem;color:var(--txt2);margin-top:.5rem"></div>
+            <div id="aiProgressWrap" style="display:none;margin-top:6px">
+              <span id="aiStatusMsg" style="font-size:.78rem;color:var(--info)"><i class="fas fa-brain"></i></span>
+            </div>
+          </div>
+          <div id="importStep2" class="hidden">
+            <div class="import-summary" id="importSummary"></div>
+            <div class="preview-table-wrap">
+              <table class="table" style="min-width:500px">
+                <thead><tr><th><input type="checkbox" id="importSelectAll" onchange="toggleImportAll(this.checked)"/></th><th>Data</th><th>Descrição</th><th>Tipo</th><th>Categoria</th><th>Valor</th><th>Status</th></tr></thead>
+                <tbody id="importPreviewBody"></tbody>
+              </table>
+            </div>
+            <div style="display:flex;gap:.75rem;margin-top:1rem;justify-content:flex-end">
+              <button class="btn btn-ghost" onclick="resetImport()"><i class="fas fa-arrow-left"></i> Voltar</button>
+              <button class="btn btn-primary" onclick="confirmImport()"><i class="fas fa-download"></i> Importar selecionadas</button>
+            </div>
+          </div>
+        </div>
+        <!-- Custom Rules -->
+        <div class="card" style="padding:1.1rem">
+          <button class="link-btn" onclick="toggleRules()" style="display:flex;align-items:center;gap:6px">
+            <i class="fas fa-cog"></i> Regras de categorização personalizadas <i class="fas fa-chevron-down" id="rulesChevron"></i>
+          </button>
+          <div id="rulesPanel" class="hidden" style="margin-top:.75rem">
+            <div id="rulesList" style="margin-bottom:.75rem"></div>
+            <div style="display:flex;gap:.6rem">
+              <button class="btn btn-outline btn-sm" onclick="addRuleRow()"><i class="fas fa-plus"></i> Nova regra</button>
+              <button class="btn btn-primary btn-sm" onclick="saveRules()"><i class="fas fa-save"></i> Salvar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="page"
+id="page-settings">
+        <div class="page-hdr"><h1 class="page-title">Configurações</h1></div>
+        <div class="settings-grid">
+          <!-- Profile -->
+          <div class="card"><div class="card-hdr"><span class="card-title"><i class="fas fa-user"></i> Perfil</span></div>
+            <div class="settings-section">
+              <div class="profile-avatar-row">
+                <div class="profile-avatar" id="profileAvatar">U</div>
+                <button class="btn btn-outline btn-sm" onclick="document.getElementById('avatarInput').click()"><i class="fas fa-camera"></i> Alterar</button>
+                <input type="file" id="avatarInput" accept="image/*" hidden onchange="uploadAvatar(this)"/>
+              </div>
+              <div class="form-group"><label class="form-label">Nome</label><input type="text" id="settingName" class="form-inp"/></div>
+              <div class="form-group"><label class="form-label">E-mail</label><input type="email" id="settingEmail" class="form-inp"/></div>
+              <button class="btn btn-primary btn-sm" onclick="saveProfile()"><i class="fas fa-save"></i> Salvar</button>
+            </div>
+          </div>
+          <!-- Security -->
+          <div class="card"><div class="card-hdr"><span class="card-title"><i class="fas fa-shield-alt"></i> Segurança</span></div>
+            <div class="settings-section">
+              <div class="form-group"><label class="form-label">Senha atual</label><input type="password" id="curPwd" class="form-inp"/></div>
+              <div class="form-group"><label class="form-label">Nova senha</label><input type="password" id="newPwd" class="form-inp"/></div>
+              <div class="form-group"><label class="form-label">Confirmar senha</label><input type="password" id="confPwd" class="form-inp"/></div>
+              <button class="btn btn-primary btn-sm" onclick="changePassword()"><i class="fas fa-key"></i> Alterar senha</button>
+              <hr style="border:none;border-top:1px solid var(--bdr);margin:1rem 0"/>
+              <p style="font-size:.82rem;color:var(--txt2);margin-bottom:.6rem">Configure um PIN para bloquear a tela rapidamente.</p>
+              <div style="display:flex;gap:.5rem">
+                <button class="btn btn-outline btn-sm" onclick="openPinModal()"><i class="fas fa-key"></i> Configurar PIN</button>
+                <button class="btn btn-ghost btn-sm" onclick="lockScreen()"><i class="fas fa-lock"></i> Bloquear</button>
+              </div>
+            </div>
+          </div>
+          <!-- Appearance -->
+          <div class="card"><div class="card-hdr"><span class="card-title"><i class="fas fa-palette"></i> Aparência</span></div>
+              <div style="margin-bottom:.75rem">
+                <div style="font-size:.8rem;font-weight:500;color:var(--txt2);margin-bottom:.4rem">Temas rápidos</div>
+                <div id="themePresets" style="display:flex;gap:.4rem;flex-wrap:wrap"></div>
+              </div>
+              <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;margin-bottom:.5rem">
+                <div><label class="form-label">Cor personalizada</label><input type="color" id="themeAccentPicker" class="form-inp" style="width:52px;height:34px;padding:2px;cursor:pointer" onchange="setAccent(this.value)"/></div>
+                <div style="flex:1;min-width:140px"><label class="form-label">Arredondamento: <span id="themeRadiusVal">12px</span></label><input type="range" id="themeRadius" min="0" max="24" value="12" class="form-inp" style="padding:0;height:auto" oninput="updateThemeRadius(this.value)" aria-label="Arredondamento das bordas"/></div>
+              </div>
+            <div class="settings-section">
+              <div class="form-group"><label class="form-label">Tema</label>
+                <div class="theme-opts">
+                  <button class="theme-opt active" data-theme="light" id="themeLight" onclick="setTheme('light')"><i class="fas fa-sun"></i> Claro</button>
+                  <button class="theme-opt" data-theme="dark" id="themeDark" onclick="setTheme('dark')"><i class="fas fa-moon"></i> Escuro</button>
+                </div>
+              </div>
+              <div class="form-group"><label class="form-label">Cor de destaque</label>
+                <div class="accent-row">
+                  <button class="accent-dot active" data-color="#10b981" style="background:#10b981" onclick="setAccent('#10b981')"></button>
+                  <button class="accent-dot" data-color="#3b82f6" style="background:#3b82f6" onclick="setAccent('#3b82f6')"></button>
+                  <button class="accent-dot" data-color="#8b5cf6" style="background:#8b5cf6" onclick="setAccent('#8b5cf6')"></button>
+                  <button class="accent-dot" data-color="#f59e0b" style="background:#f59e0b" onclick="setAccent('#f59e0b')"></button>
+                  <button class="accent-dot" data-color="#ef4444" style="background:#ef4444" onclick="setAccent('#ef4444')"></button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Locale -->
+          <div class="card"><div class="card-hdr"><span class="card-title"><i class="fas fa-globe"></i> Localização</span></div>
+            <div class="settings-section">
+              <div class="form-group"><label class="form-label">Moeda</label>
+                <select id="settingCurrency" class="form-inp" onchange="savePref('currency',this.value)">
+                  <option value="BRL">R$ – Real brasileiro</option><option value="USD">$ – Dólar americano</option><option value="EUR">€ – Euro</option><option value="GBP">£ – Libra</option>
+                </select>
+              </div>
+              <div class="form-group"><label class="form-label">Formato de data</label>
+                <select id="settingDateFormat" class="form-inp" onchange="savePref('dateFormat',this.value)">
+                  <option value="dd/MM/yyyy">DD/MM/AAAA</option><option value="MM/dd/yyyy">MM/DD/AAAA</option>
+                </select>
+              </div>
+              <div class="form-group"><label class="form-label">Idioma</label>
+                <select id="settingLanguage" class="form-inp" onchange="savePref('language',this.value)">
+                  <option value="pt">Português</option>
+                  <option value="en">Inglês</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <!-- Notifications -->
+          <div class="card"><div class="card-hdr"><span class="card-title"><i class="fas fa-bell"></i> Notificações</span></div>
+            <div class="settings-section">
+              <div class="toggle-row"><div class="toggle-row-info"><strong>Orçamento 80%</strong><span>Alertar ao atingir 80% do limite</span></div><label class="toggle"><input type="checkbox" id="notifBudget80" onchange="savePref('notifBudget80',this.checked)"/><span class="toggle-slider"></span></label></div>
+              <div class="toggle-row"><div class="toggle-row-info"><strong>Orçamento 100%</strong><span>Alertar ao estourar o limite</span></div><label class="toggle"><input type="checkbox" id="notifBudget100" onchange="savePref('notifBudget100',this.checked)"/><span class="toggle-slider"></span></label></div>
+              <div class="toggle-row"><div class="toggle-row-info"><strong>Gastos anômalos</strong><span>Detectar valores muito acima da média</span></div><label class="toggle"><input type="checkbox" id="notifAnomalous" onchange="savePref('notifAnomalous',this.checked)"/><span class="toggle-slider"></span></label></div>
+              <div class="toggle-row"><div class="toggle-row-info"><strong>Vencimentos de assinaturas</strong><span>Alertar quando assinaturas estiverem próximas do vencimento</span></div><label class="toggle"><input type="checkbox" id="notifSubscriptionDue" onchange="savePref('notifSubscriptionDue',this.checked)"/><span class="toggle-slider"></span></label></div>
+              <div class="toggle-row"><div class="toggle-row-info"><strong>Voz automática</strong><span>Falar alertas importantes automaticamente</span></div><label class="toggle"><input type="checkbox" id="notifAutoVoice" onchange="savePref('notifAutoVoice',this.checked)"/><span class="toggle-slider"></span></label></div>
+              <div class="toggle-row"><div class="toggle-row-info"><strong>Assistente IA por voz</strong><span>Falar respostas do assistente quando ativado</span></div><label class="toggle"><input type="checkbox" id="aiVoiceEnabled" onchange="savePref('aiVoiceEnabled',this.checked)"/><span class="toggle-slider"></span></label></div>
+            </div>
+          </div>
+          <!-- IA Local -->
+          <div class="card"><div class="card-hdr"><span class="card-title"><i class="fas fa-brain"></i> Assistente IA — Modelo Local</span></div>
+            <div class="settings-section">
+              <!-- Status atual -->
+              <div id="aiModelStatus" style="padding:.6rem .85rem;border-radius:var(--r);background:var(--bg-s);margin-bottom:.85rem;font-size:.82rem;line-height:1.6">
+                <i class="fas fa-circle-notch fa-spin"></i> Verificando modelo...
+              </div>
+              <!-- Seleção de modelos -->
+              <div style="font-size:.78rem;font-weight:500;color:var(--txt2);margin-bottom:.6rem;text-transform:uppercase;letter-spacing:.4px">Modelos disponíveis</div>
+              <div id="aiModelList" style="display:flex;flex-direction:column;gap:.6rem"></div>
+              <!-- Painel de diagnóstico -->
+              <!-- Ollama Status -->
+              <div id="ollamaPanel" style="margin-bottom:.75rem;padding:.7rem .85rem;border-radius:var(--r);border:0.5px solid var(--bdr)">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+                  <div>
+                    <span style="font-size:.8rem;font-weight:500"><i class="fas fa-server"></i> Ollama (LLM local)</span>
+                    <span id="ollamaStatusBadge" style="font-size:.68rem;padding:2px 8px;border-radius:99px;background:var(--bg-s);color:var(--txt2);margin-left:6px">verificando...</span>
+                  </div>
+                  <button class="btn btn-outline btn-sm" style="font-size:.73rem" onclick="checkOllamaStatus()"><i class="fas fa-sync"></i> Verificar</button>
+                </div>
+                <div id="ollamaStatusMsg" style="font-size:.77rem;color:var(--txt2);margin-top:.4rem;line-height:1.6"></div>
+                <div id="ollamaModelRow" style="display:none;margin-top:.5rem;display:flex;align-items:center;gap:8px">
+                  <label style="font-size:.77rem;color:var(--txt2);white-space:nowrap">Modelo:</label>
+                  <input type="text" class="form-inp" id="ollamaModelInput" value="llama3.2:1b" style="font-size:.77rem;flex:1" placeholder="ex: llama3.2:1b, mistral, qwen2.5:1.5b">
+                  <button class="btn btn-outline btn-sm" style="font-size:.73rem" onclick="saveOllamaModel()"><i class="fas fa-save"></i></button>
+                </div>
+              </div>
+              <!-- Aviso file:// -->
+              <div id="fileProtWarn" style="display:none;margin-top:.75rem;padding:.75rem 1rem;background:#FAEEDA;border-left:3px solid #EF9F27;border-radius:0 var(--r) var(--r) 0">
+                <div style="font-size:.8rem;font-weight:500;color:#633806;margin-bottom:.4rem">⚠️ Modelo Llama não funciona via file://</div>
+                <div style="font-size:.76rem;color:#633806;line-height:1.65">
+                  Para usar o modelo Llama, sirva o app via HTTP local:<br>
+                  <code style="background:rgba(0,0,0,.08);padding:2px 6px;border-radius:4px;display:inline-block;margin:.3rem 0">python -m http.server 3000</code><br>
+                  Depois acesse <a href="http://localhost:3000" target="_blank" style="color:#633806"><strong>http://localhost:3000</strong></a><br>
+                  <em>O assistente de padrões funciona normalmente em file://.</em>
+                </div>
+              </div>
+              <!-- Diagnóstico -->
+              <div style="margin-top:.75rem;padding:.7rem .85rem;background:var(--bg);border-radius:var(--r);border:0.5px solid var(--bdr)">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+                  <span style="font-size:.78rem;font-weight:500">🔬 Diagnóstico da IA</span>
+                  <button class="btn btn-outline btn-sm" style="font-size:.73rem" onclick="aiDiagnostic()"><i class="fas fa-stethoscope"></i> Testar</button>
+                </div>
+                <div id="aiDiagResult" style="font-size:.77rem;color:var(--txt2);min-height:24px">Clique em "Testar" para verificar se o Llama está carregado.</div>
+              </div>
+
+            </div>
+          </div>
+                    <!-- Backup -->
+          <div class="card"><div class="card-hdr"><span class="card-title"><i class="fas fa-database"></i> Backup e Dados</span></div>
+            <div class="settings-section">
+              <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem">
+                <button class="btn btn-outline btn-sm" onclick="exportBackup()"><i class="fas fa-download"></i> Exportar JSON</button>
+                <button class="btn btn-outline btn-sm" onclick="openModal('modalEncryptedBackup')"><i class="fas fa-lock"></i> Exportar Criptografado</button>
+                <button class="btn btn-outline btn-sm" onclick="document.getElementById('importEncryptedInput').click()"><i class="fas fa-unlock"></i> Restaurar .fpbak</button>
+                <input type="file" id="importEncryptedInput" accept=".fpbak" hidden onchange="importEncryptedBackup(this)"/>
+                <button class="btn btn-outline btn-sm" onclick="document.getElementById('importBackupInput').click()"><i class="fas fa-upload"></i> Importar JSON</button>
+                <input type="file" id="importBackupInput" accept=".json" hidden onchange="importBackup(this)"/>
+              </div>
+              <div class="danger-zone">
+                <div class="danger-title"><i class="fas fa-exclamation-triangle"></i> Zona de Risco</div>
+                <button class="btn btn-danger btn-sm" onclick="resetAllData()"><i class="fas fa-trash-alt"></i> Apagar todos os dados</button>
+              </div>
+            </div>
+          </div>
+
+          
+
+          
+        </div>
+      </div>
+      <!-- ══════════ CONTROLE FINANCEIRO ══════════ -->
+      <div class="page" id="page-controle">
+        <!-- Cabeçalho fixo da página -->
+        <div class="page-hdr">
+          <div>
+            <h1 class="page-title"><i class="fas fa-layer-group" style="color:var(--accent)"></i> Controle Financeiro</h1>
+            <p class="page-sub">Painel de controle completo — limites, favorecidos, regras e IA integrada</p>
+          </div>
+          <div class="hdr-actions">
+            <div style="display:flex;align-items:center;gap:.4rem;background:var(--surf);border:1.5px solid var(--bdr);border-radius:8px;padding:3px 6px">
+              <button class="btn btn-ghost btn-sm" onclick="window.cfChangeMonth(-1)" id="cfPrevMonth" aria-label="Mês anterior" style="padding:4px 8px"><i class="fas fa-chevron-left"></i></button>
+              <span id="cfMonthLabel" style="font-size:.88rem;font-weight:700;min-width:90px;text-align:center">—</span>
+              <button class="btn btn-ghost btn-sm" onclick="window.cfChangeMonth(1)"  id="cfNextMonth" aria-label="Próximo mês"  style="padding:4px 8px"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="window.loadControleFinanceiro()" title="Atualizar"><i class="fas fa-sync"></i></button>
+            <button class="btn btn-outline btn-sm" onclick="window.cfBriefingIA()"><i class="fas fa-robot" style="color:var(--accent)"></i> Briefing IA</button>
+            <button class="btn btn-primary btn-sm" onclick="navigate('budgets')"><i class="fas fa-sliders-h"></i> Orçamentos simples</button>
+          </div>
+        </div>
+        <!-- Zona dinâmica (tudo aqui é renderizado por JS) -->
+        <div id="cfPageZone"></div>
+      </div>
+
+      <!-- ══════════ SIMULATOR PAGE ══════════ -->
+      <div class="page" id="page-simulator">
+        <div class="page-hdr">
+          <div>
+            <h1 class="page-title"><i class="fas fa-sliders-h" style="color:var(--accent)"></i> Simulador de Cenários</h1>
+            <p class="page-sub">Projete o futuro com dados reais — compare 2 cenários lado a lado</p>
+          </div>
+        </div>
+        <div id="simulatorZone">
+          <div style="padding:2rem;text-align:center;color:var(--txt2)">
+            <i class="fas fa-spinner fa-spin" style="font-size:1.5rem"></i><br><br>Carregando simulador...
+          </div>
+        </div>
+      </div>
+      <div class="page" id="page-challenges">
+        <div style="padding:1rem;text-align:center;color:var(--txt2)">
+          <i class="fas fa-spinner fa-spin"></i> Carregando desafios...
+        </div>
+      </div>
+
+      <!-- ══════════ ANOMALIES PAGE ══════════ -->
+      <div class="page" id="page-anomalies">
+        <div class="page-hdr">
+          <div><h1 class="page-title">🛡️ Fraudes & Anomalias</h1><p class="page-sub">Detecção automática de padrões suspeitos nas suas transações</p></div>
+          <button class="btn btn-primary" onclick="window.FP_FRAUD && FP_FRAUD.runFullScan()"><i class="fas fa-search"></i> Verificar Agora</button>
+        </div>
+        <div class="stats-grid" id="anomalyStatsGrid" style="margin-bottom:1.25rem">
+          <div class="stat-card"><div class="stat-icon" style="background:var(--danger)"><i class="fas fa-exclamation-triangle"></i></div><div><div class="stat-label">Alta Severidade</div><div class="stat-value text-danger" id="anomalyHigh">0</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--warning)"><i class="fas fa-exclamation-circle"></i></div><div><div class="stat-label">Média Severidade</div><div class="stat-value text-warning" id="anomalyMid">0</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--info)"><i class="fas fa-info-circle"></i></div><div><div class="stat-label">Informações</div><div class="stat-value" id="anomalyLow">0</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--success)"><i class="fas fa-check-circle"></i></div><div><div class="stat-label">Analisadas</div><div class="stat-value text-success" id="anomalyTotal">0</div></div></div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><span class="card-title"><i class="fas fa-list-ul"></i> Alertas Detectados</span><span id="anomalyLastScan" style="font-size:.72rem;color:var(--txt2)">Nunca verificado</span></div>
+          <div id="anomalyList" style="padding:.5rem 1rem 1rem">
+            <div class="empty-state"><div class="empty-icon"><i class="fas fa-shield-alt"></i></div><p class="empty-title">Tudo em dia!</p><p class="empty-text">Clique em "Verificar Agora" para analisar suas transações</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ EDUCATION PAGE ══════════ -->
+      <div class="page" id="page-education">
+        <div class="page-hdr">
+          <div><h1 class="page-title">🎓 Educação Financeira</h1><p class="page-sub">Aprenda finanças pessoais — conteúdo 100% offline</p></div>
+        </div>
+        <!-- Category tabs -->
+        <div class="auth-tabs" style="max-width:600px;margin-bottom:1.25rem" id="eduTabs">
+          <button class="auth-tab active" onclick="filterEduContent('all',this)">Todos</button>
+          <button class="auth-tab" onclick="filterEduContent('beginner',this)">Iniciante</button>
+          <button class="auth-tab" onclick="filterEduContent('intermediate',this)">Intermediário</button>
+          <button class="auth-tab" onclick="filterEduContent('advanced',this)">Avançado</button>
+        </div>
+        <div id="educationGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem"></div>
+        <!-- Article reader modal -->
+        <div id="eduArticleModal" class="hidden" style="position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:1rem">
+          <div style="background:var(--surf);border-radius:var(--r-lg);max-width:640px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow-lg)">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--bdr);position:sticky;top:0;background:var(--surf)">
+              <h3 id="eduArticleTitle" style="font-size:1.05rem;font-weight:700"></h3>
+              <button onclick="document.getElementById('eduArticleModal').classList.add('hidden')" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:var(--txt2)"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="eduArticleBody" style="padding:1.25rem;line-height:1.8;font-size:.9rem"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ BENCHMARK PAGE ══════════ -->
+      <div class="page" id="page-benchmark">
+        <div class="page-hdr">
+          <div><h1 class="page-title">📊 Benchmark Nacional</h1><p class="page-sub">Compare seus gastos com as médias brasileiras por categoria</p></div>
+          <button class="btn btn-primary" onclick="window.FP_BENCHMARK && FP_BENCHMARK.render()"><i class="fas fa-sync"></i> Atualizar</button>
+        </div>
+        <div class="card" style="margin-bottom:1rem;padding:1rem">
+          <p style="font-size:.85rem;color:var(--txt2)"><i class="fas fa-info-circle" style="color:var(--info)"></i> Dados baseados em pesquisas IBGE e FGV sobre consumo das famílias brasileiras. Comparação realizada com dados locais — nenhum dado é enviado para servidores.</p>
+        </div>
+        <div id="benchmarkGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem"></div>
+        <div class="card" style="margin-top:1rem">
+          <div class="card-hdr"><span class="card-title"><i class="fas fa-piggy-bank"></i> Sua Taxa de Poupança</span></div>
+          <div id="savingsRateBenchmark" style="padding:1rem"></div>
+        </div>
+      </div>
+
+    </div><!-- /pages -->
+  </main>
+</div><!-- /appShell -->
+
+<!-- ═══════════════ MODALS ═══════════════ -->
+
+<!-- Transaction Modal -->
+<div class="modal-wrap hidden" id="modalTx">
+  <div class="modal"><div class="modal-hdr"><h2 class="modal-title" id="txModalTitle">Nova Transação</h2><button class="modal-close" onclick="closeModal('modalTx')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="type-toggle">
+        <button class="type-btn active-expense" id="txBtnExpense" data-type="expense" onclick="setTxType('expense')"><i class="fas fa-arrow-down"></i> Despesa</button>
+        <button class="type-btn" id="txBtnIncome" data-type="income" onclick="setTxType('income')"><i class="fas fa-arrow-up"></i> Receita</button>
+        <button class="type-btn" id="txBtnTransfer" data-type="transfer" onclick="setTxType('transfer')"><i class="fas fa-exchange-alt"></i> Transferência</button>
+      </div>
+      <div class="amount-box" style="margin-bottom:1rem">
+        <span class="amount-sym" id="txAmtSym">R$</span>
+        <input type="number" id="txAmount" class="amount-inp" placeholder="0,00" step="0.01" min="0"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Categoria</label><select id="txCategory" class="form-inp"></select></div>
+        <div class="form-group"><label class="form-label">Conta</label><select id="txAccount" class="form-inp"></select></div>
+      </div>
+      <div id="txTransferToGroup" class="form-group hidden"><label class="form-label">Conta destino</label><select id="txAccountTo" class="form-inp"></select></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Data</label><input type="date" id="txDate" class="form-inp"/></div>
+        <div class="form-group"><label class="form-label">Descrição</label><input type="text" id="txDesc" class="form-inp" oninput="suggestCategory(this)" placeholder="Opcional"/></div>
+      </div>
+      <div id="catSuggestions" style="min-height:0;margin-bottom:.25rem"></div>
+            <div class="form-group"><label class="form-label">Tags (separadas por vírgula)</label><input type="text" id="txTags" class="form-inp" placeholder="viagem, urgente, fixo..."/></div>
+      <div class="form-group"><label class="check-label"><input type="checkbox" id="txIsRecurring" onchange="toggleRecurringOpts()"/> <span>Transação recorrente</span></label></div>
+      <div id="txRecurringOpts" class="hidden" style="padding:.75rem;background:var(--bg-s);border-radius:var(--r);border:1px solid var(--bdr);margin-bottom:.75rem">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Frequência</label>
+            <select id="txFreq" class="form-inp"><option value="daily">Diária</option><option value="weekly">Semanal</option><option value="biweekly">Quinzenal</option><option value="monthly" selected>Mensal</option><option value="yearly">Anual</option></select>
+          </div>
+          <div class="form-group"><label class="form-label">Repetir até</label><input type="date" id="txRecurEnd" class="form-inp"/></div>
+        </div>
+
+        <!-- Auto Theme -->
+        <div class="card">
+          <div class="card-hdr"><span class="card-title"><i class="fas fa-moon"></i> Modo escuro automático</span></div>
+          <div id="autoThemeSettings" style="padding:.5rem 0"></div>
+        </div>
+
+        <!-- Auto Backup -->
+        <div class="card">
+          <div class="card-hdr"><span class="card-title"><i class="fas fa-robot"></i> Backup automático agendado</span></div>
+          <div id="autoBackupSettings" style="padding:.5rem 0"></div>
+        </div>
+      </div>
+      <div class="form-group"><label class="check-label"><input type="checkbox" id="txIsInstallment" onchange="toggleInstallmentOpts()"/> <span>Parcelado</span></label></div>
+      <div id="txInstallmentOpts" class="hidden" style="padding:.75rem;background:var(--bg-s);border-radius:var(--r);border:1px solid var(--bdr)">
+        <div class="form-group"><label class="form-label">Número de parcelas</label><input type="number" id="txInstN" class="form-inp" value="2" min="2" max="60"/></div>
+      </div>
+    </div>
+    <div class="modal-footer"><input type="hidden" id="txEditId"/><button class="btn btn-ghost" onclick="closeModal('modalTx')">Cancelar</button><button class="btn btn-primary" onclick="saveTx()"><i class="fas fa-save"></i> Salvar</button></div>
+  </div>
+</div>
+
+<!-- Category Modal -->
+<div class="modal-wrap hidden" id="modalCat">
+  <div class="modal modal-sm"><div class="modal-hdr"><h2 class="modal-title" id="catModalTitle">Nova Categoria</h2><button class="modal-close" onclick="closeModal('modalCat')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Nome</label><input type="text" id="catName" class="form-inp" placeholder="Ex: Alimentação"/></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Tipo</label><select id="catType" class="form-inp"><option value="expense">Despesa</option><option value="income">Receita</option></select></div>
+        <div class="form-group"><label class="form-label">Cor</label><input type="color" id="catColor" class="form-inp" value="#10b981"/></div>
+      </div>
+      <div class="form-group"><label class="form-label">Ícone</label><div id="iconPicker" style="display:grid;grid-template-columns:repeat(8,1fr);gap:5px;max-height:140px;overflow-y:auto"></div><input type="hidden" id="catIcon" value="fa-tag"/></div>
+    </div>
+    <div class="modal-footer"><input type="hidden" id="catEditId"/><button class="btn btn-ghost" onclick="closeModal('modalCat')">Cancelar</button><button class="btn btn-primary" onclick="saveCat()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- Account Modal -->
+<div class="modal-wrap hidden" id="modalAccount">
+  <div class="modal modal-sm"><div class="modal-hdr"><h2 class="modal-title" id="accModalTitle">Nova Conta</h2><button class="modal-close" onclick="closeModal('modalAccount')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Nome</label><input type="text" id="accName" class="form-inp" placeholder="Ex: Nubank"/></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Tipo</label>
+          <select id="accType" class="form-inp"><option value="checking">Conta corrente</option><option value="savings">Poupança</option><option value="wallet">Carteira</option><option value="credit">Cartão de crédito</option><option value="investment">Investimentos</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Cor</label><input type="color" id="accColor" class="form-inp" value="#10b981"/></div>
+      </div>
+      <div class="form-group"><label class="form-label">Saldo inicial (R$)</label><input type="number" id="accBalance" class="form-inp" value="0" step="0.01"/></div>
+    </div>
+    <div class="modal-footer"><input type="hidden" id="accEditId"/><button class="btn btn-ghost" onclick="closeModal('modalAccount')">Cancelar</button><button class="btn btn-primary" onclick="saveAccount()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- Goal Modal -->
+<div class="modal-wrap hidden" id="modalGoal">
+  <div class="modal modal-sm"><div class="modal-hdr"><h2 class="modal-title" id="goalModalTitle">Nova Meta</h2><button class="modal-close" onclick="closeModal('modalGoal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Nome</label><input type="text" id="goalName" class="form-inp" placeholder="Ex: Viagem para Europa"/></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Valor alvo (R$)</label><input type="number" id="goalTarget" class="form-inp" step="0.01"/></div>
+        <div class="form-group"><label class="form-label">Valor atual (R$)</label><input type="number" id="goalCurrent" class="form-inp" value="0" step="0.01"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Data limite</label><input type="date" id="goalDeadline" class="form-inp"/></div>
+        <div class="form-group"><label class="form-label">Ícone (Font Awesome)</label><input type="hidden" id="goalIcon" value="🌟"/><div id="goalIconPicker" style="display:flex;flex-wrap:wrap;gap:4px;padding:.5rem;background:var(--bg-s);border-radius:8px;border:1px solid var(--bdr)"></div></div>
+      </div>
+    </div>
+    <div class="modal-footer"><input type="hidden" id="goalEditId"/><button class="btn btn-ghost" onclick="closeModal('modalGoal')">Cancelar</button><button class="btn btn-primary" onclick="saveGoal()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- Subscription Modal -->
+<div class="modal-wrap hidden" id="modalSub">
+  <div class="modal modal-sm"><div class="modal-hdr"><h2 class="modal-title" id="subModalTitle">Nova Assinatura</h2><button class="modal-close" onclick="closeModal('modalSub')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Nome do serviço</label><input type="text" id="subName" class="form-inp" placeholder="Netflix, Spotify..."/></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Valor (R$)</label><input type="number" id="subAmount" class="form-inp" step="0.01"/></div>
+        <div class="form-group"><label class="form-label">Ciclo</label>
+          <select id="subCycle" class="form-inp"><option value="monthly">Mensal</option><option value="yearly">Anual</option><option value="quarterly">Trimestral</option><option value="weekly">Semanal</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Próximo vencimento</label><input type="date" id="subNextDue" class="form-inp"/></div>
+        <div class="form-group"><label class="form-label">Categoria</label><select id="subCat" class="form-inp"></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Conta</label><select id="subAcc" class="form-inp"></select></div>
+        <div class="form-group"><label class="form-label">Cor</label><input type="color" id="subColor" class="form-inp" value="#10b981"/></div>
+      </div>
+      <div class="form-group"><label class="form-label">Ícone</label><input type="text" id="subIcon" class="form-inp" value="fa-credit-card"/></div>
+      <div style="margin-top:.5rem">
+        <p style="font-size:.8rem;font-weight:600;color:var(--txt2);margin-bottom:6px">Populares:</p>
+        <div id="popularSubBtns" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      </div>
+    </div>
+    <div class="modal-footer"><input type="hidden" id="subEditId"/><button class="btn btn-ghost" onclick="closeModal('modalSub')">Cancelar</button><button class="btn btn-primary" onclick="saveSub()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- Patrimony Modal -->
+<div class="modal-wrap hidden" id="modalPat">
+  <div class="modal modal-sm"><div class="modal-hdr"><h2 class="modal-title" id="patModalTitle">Novo Ativo</h2><button class="modal-close" onclick="closeModal('modalPat')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Nome</label><input type="text" id="patName" class="form-inp" placeholder="Ex: Apartamento"/></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Tipo</label><select id="patType" class="form-inp"></select></div>
+        <div class="form-group"><label class="form-label">Valor (R$)</label><input type="number" id="patValue" class="form-inp" step="0.01"/></div>
+      </div>
+      <div class="form-group"><label class="form-label">Observação</label><input type="text" id="patNote" class="form-inp" placeholder="Opcional"/></div>
+    </div>
+    <div class="modal-footer"><input type="hidden" id="patEditId"/><input type="hidden" id="patKind" value="asset"/><button class="btn btn-ghost" onclick="closeModal('modalPat')">Cancelar</button><button class="btn btn-primary" onclick="savePat()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- Split Modal -->
+<div class="modal-wrap hidden" id="modalSplit">
+  <div class="modal"><div class="modal-hdr"><h2 class="modal-title" id="splitModalTitle">Dividir Despesa</h2><button class="modal-close" onclick="closeModal('modalSplit')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Descrição</label><input type="text" id="splitTitle" class="form-inp" placeholder="Jantar, viagem..."/></div>
+        <div class="form-group"><label class="form-label">Data</label><input type="date" id="splitDate" class="form-inp"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Valor total (R$)</label><input type="number" id="splitAmount" class="form-inp" step="0.01" oninput="recalcSplitShares()"/></div>
+        <div class="form-group"><label class="form-label">Divisão</label>
+          <select id="splitMethod" class="form-inp" onchange="recalcSplitShares()"><option value="equal">Igual</option><option value="custom">Personalizada</option></select>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+        <label class="form-label" style="margin:0">Participantes</label>
+        <button class="btn btn-ghost btn-sm" onclick="addSplitParticipant()"><i class="fas fa-user-plus"></i> Adicionar</button>
+      </div>
+      <div id="splitParticipants"></div>
+    </div>
+    <div class="modal-footer"><input type="hidden" id="splitEditId"/><button class="btn btn-ghost" onclick="closeModal('modalSplit')">Cancelar</button><button class="btn btn-primary" onclick="saveSplit()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- PIN Modal -->
+<div class="modal-wrap hidden" id="modalPin">
+  <div class="modal modal-sm"><div class="modal-hdr"><h2 class="modal-title">PIN de Bloqueio</h2><button class="modal-close" onclick="closeModal('modalPin')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <p style="font-size:.85rem;color:var(--txt2);margin-bottom:.9rem">Configure um PIN de 4–6 dígitos para bloquear rapidamente sem sair da conta.</p>
+      <div class="form-group"><label class="form-label">Novo PIN (dígitos)</label><input type="password" id="pinNew" class="form-inp" inputmode="numeric" maxlength="6" placeholder="••••"/></div>
+      <div class="form-group"><label class="form-label">Confirmar PIN</label><input type="password" id="pinConf" class="form-inp" inputmode="numeric" maxlength="6" placeholder="••••"/></div>
+      <div class="form-group"><label class="form-label">Bloquear após inatividade</label>
+        <select id="pinInactivity" class="form-inp"><option value="2">2 minutos</option><option value="5" selected>5 minutos</option><option value="10">10 minutos</option><option value="30">30 minutos</option><option value="0">Nunca</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" onclick="removePin()" id="removePinBtn" style="margin-right:auto;display:none">Remover PIN</button>
+      <button class="btn btn-ghost" onclick="closeModal('modalPin')">Cancelar</button>
+      <button class="btn btn-primary" onclick="savePin()"><i class="fas fa-lock"></i> Salvar PIN</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+
+  <!-- Modal: Add Funds to Goal -->
+  <div class="modal-wrap hidden" id="modalAddFunds" role="dialog" aria-modal="true" aria-labelledby="addFundsTitle">
+    <div class="modal">
+      <div class="modal-hdr"><h2 class="modal-title" id="addFundsTitle">Adicionar Aporte</h2><button class="modal-close" onclick="closeModal('modalAddFunds')" aria-label="Fechar"><i class="fas fa-times"></i></button></div>
+      <input type="hidden" id="addFundsGoalId"/>
+      <div class="form-group"><label class="form-label">Valor a adicionar</label><div class="inp-wrap"><span class="inp-icon" id="addFundsSym" style="font-weight:600;color:var(--accent)">R$</span><input type="number" id="addFundsAmount" class="form-inp" placeholder="0,00" step="0.01" min="0.01"/></div><div style="font-size:.78rem;color:var(--txt2);margin-top:4px">Faltam: <span id="addFundsMax"></span></div></div>
+      <div class="form-group"><label class="form-label">Descrição (opcional)</label><input type="text" id="addFundsDesc" class="form-inp" placeholder="Ex: Poupança de julho"/></div>
+      <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modalAddFunds')">Cancelar</button><button class="btn btn-primary" onclick="saveAddFunds()"><i class="fas fa-check"></i> Confirmar</button></div>
+    </div>
+  </div>
+
+
+<div class="modal-wrap hidden" id="modalConfirm">
+  <div class="modal modal-sm"><div class="modal-hdr"><h2 class="modal-title" id="confirmTitle">Confirmar</h2></div>
+    <div class="modal-body"><p id="confirmMsg" style="color:var(--txt2)"></p></div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modalConfirm')">Cancelar</button><button class="btn btn-danger" id="confirmOkBtn">Confirmar</button></div>
+  </div>
+</div>
+
+<!-- Lock Screen -->
+<div id="lockScreen" class="hidden">
+  <div class="lock-card">
+    <div class="lock-ico"><i class="fas fa-lock"></i></div>
+    <div class="lock-title">Tela bloqueada</div>
+    <div class="lock-sub">Digite seu PIN para continuar</div>
+    <div class="lock-dots" id="lockDots"></div>
+    <div class="lock-pad" id="lockPad"></div>
+    <div style="margin-top:1rem"><button class="link-btn" onclick="doLogout()" style="font-size:.8rem">Sair da conta</button></div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer"></div>
+
+<!-- FAB -->
+<button id="fab" onclick="openTxModal()" aria-label="Nova transação"><i class="fas fa-plus"></i></button>
+
+<!-- App -->
+<script src="app.js"></script>
+
+  <!-- Modal: Debt -->
+  <div class="modal-wrap hidden" id="modalDebt" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-hdr"><h2 class="modal-title" id="debtModalTitle">Nova Dívida</h2><button class="modal-close" onclick="closeModal('modalDebt')" aria-label="Fechar"><i class="fas fa-times"></i></button></div>
+      <input type="hidden" id="debtEditIdx"/>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+        <div class="form-group"><label class="form-label">Nome da dívida</label><input type="text" id="debtName" class="form-inp" placeholder="Ex: Financiamento carro"/></div>
+        <div class="form-group"><label class="form-label">Tipo</label><select id="debtType" class="form-inp"><option value="personal">Empréstimo pessoal</option><option value="mortgage">Financiamento imóvel</option><option value="car">Financiamento veicular</option><option value="credit">Cartão de crédito</option><option value="other">Outro</option></select></div>
+        <div class="form-group"><label class="form-label">Saldo devedor (R$)</label><input type="number" id="debtBalance" class="form-inp" step="0.01" placeholder="0,00"/></div>
+        <div class="form-group"><label class="form-label">Taxa mensal (%)</label><input type="number" id="debtRate" class="form-inp" step="0.01" placeholder="1,5"/></div>
+        <div class="form-group"><label class="form-label">Parcelas restantes</label><input type="number" id="debtRemaining" class="form-inp" placeholder="24"/></div>
+        <div class="form-group"><label class="form-label">Pagamento extra/mês (R$)</label><input type="number" id="debtExtra" class="form-inp" step="0.01" placeholder="0,00" value="0"/></div>
+      </div>
+      <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modalDebt')">Cancelar</button><button class="btn btn-primary" onclick="saveDebt()"><i class="fas fa-check"></i> Salvar</button></div>
+    </div>
+  </div>
+
+  <!-- Modal: Auto Goal Contribution -->
+  <div class="modal-wrap hidden" id="modalAutoGoal" role="dialog" aria-modal="true">
+    <div class="modal" style="max-width:420px">
+      <div class="modal-hdr"><h2 class="modal-title">Vincular à Meta?</h2><button class="modal-close" onclick="closeModal('modalAutoGoal')" aria-label="Fechar"><i class="fas fa-times"></i></button></div>
+      <p style="font-size:.85rem;color:var(--txt2);margin-bottom:1rem">Você registrou: <strong id="autoGoalTxDesc"></strong>. Deseja adicionar este valor a uma meta de poupança?</p>
+      <div class="form-group"><label class="form-label">Meta</label><select id="autoGoalSelect" class="form-inp"></select></div>
+      <div class="form-group"><label class="form-label">Valor a adicionar (R$)</label><input type="number" id="autoGoalAmount" class="form-inp" step="0.01"/></div>
+      <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('modalAutoGoal')">Não agora</button><button class="btn btn-primary" onclick="confirmAutoGoalContribution()"><i class="fas fa-star"></i> Adicionar à meta</button></div>
+    </div>
+  </div>
+
+  <!-- Modal: Encrypted Backup Password -->
+  <div class="modal-wrap hidden" id="modalEncryptedBackup" role="dialog" aria-modal="true">
+    <div class="modal" style="max-width:400px">
+      <div class="modal-hdr"><h2 class="modal-title"><i class="fas fa-lock"></i> Backup Criptografado</h2><button class="modal-close" onclick="closeModal('modalEncryptedBackup')" aria-label="Fechar"><i class="fas fa-times"></i></button></div>
+      <p style="font-size:.85rem;color:var(--txt2);margin-bottom:1rem">O arquivo será criptografado com AES-256. Guarde a senha — sem ela não é possível restaurar.</p>
+      <div class="form-group"><label class="form-label">Senha de criptografia (mín. 6 caracteres)</label><input type="password" id="backupPwd" class="form-inp" placeholder="Senha forte..." autocomplete="new-password"/></div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modalEncryptedBackup')">Cancelar</button>
+        <button class="btn btn-primary" onclick="exportEncryptedBackup()"><i class="fas fa-lock"></i> Exportar criptografado</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal: Loan -->
+  <div class="modal-wrap hidden" id="modalLoan" role="dialog" aria-modal="true">
+    <div class="modal" style="max-width:500px">
+      <div class="modal-hdr">
+        <h2 class="modal-title" id="loanModalTitle">Novo Empréstimo</h2>
+        <button class="modal-close" onclick="closeModal('modalLoan')" aria-label="Fechar"><i class="fas fa-times"></i></button>
+      </div>
+      <input type="hidden" id="loanEditId"/>
+      <input type="hidden" id="loanKind" value="given"/>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label">Nome da pessoa <span style="color:var(--danger)">*</span></label>
+          <input type="text" id="loanPerson" class="form-inp" placeholder="Ex: João Silva"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Valor (R$) <span style="color:var(--danger)">*</span></label>
+          <input type="number" id="loanAmount" class="form-inp" step="0.01" placeholder="0,00"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Data de vencimento</label>
+          <input type="date" id="loanDueDate" class="form-inp"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Taxa de juros (%/mês)</label>
+          <input type="number" id="loanInterest" class="form-inp" step="0.1" value="0" placeholder="0"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Conta vinculada</label>
+          <select id="loanAccount" class="form-inp"></select>
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label">Observação</label>
+          <input type="text" id="loanDesc" class="form-inp" placeholder="Ex: Para emergência médica"/>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modalLoan')">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveLoan()"><i class="fas fa-check"></i> Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Loan Payment -->
+  <div class="modal-wrap hidden" id="modalLoanPayment" role="dialog" aria-modal="true">
+    <div class="modal" style="max-width:380px">
+      <div class="modal-hdr">
+        <h2 class="modal-title"><i class="fas fa-coins"></i> Registrar Pagamento</h2>
+        <button class="modal-close" onclick="closeModal('modalLoanPayment')" aria-label="Fechar"><i class="fas fa-times"></i></button>
+      </div>
+      <input type="hidden" id="loanPayId"/>
+      <div class="form-group">
+        <label class="form-label">Valor pago (R$)</label>
+        <input type="number" id="loanPayAmount" class="form-inp" step="0.01"/>
+        <div style="font-size:.75rem;color:var(--txt2);margin-top:4px">Restante: <strong id="loanPayMax"></strong></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('modalLoanPayment')">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveLoanPayment()"><i class="fas fa-check"></i> Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Global Search Overlay -->
+  <div id="globalSearch" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;display:flex;align-items:flex-start;justify-content:center;padding-top:80px" onclick="if(event.target===this)closeGlobalSearch()">
+    <div style="background:var(--surf);border-radius:var(--r);box-shadow:0 20px 60px rgba(0,0,0,.25);width:min(620px,94vw);max-height:70vh;display:flex;flex-direction:column;overflow:hidden">
+      <div style="padding:.75rem 1rem;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:.5rem">
+        <i class="fas fa-search" style="color:var(--txt2)"></i>
+        <input id="gsInput" class="form-inp" style="border:none;flex:1;font-size:.95rem;padding:0" placeholder="Buscar transações, páginas..." oninput="runGlobalSearch(this.value)" onkeydown="if(event.key==='Escape')closeGlobalSearch()" autofocus/>
+        <kbd style="font-size:.7rem;background:var(--bg-s);padding:2px 6px;border-radius:4px;color:var(--txt2);border:1px solid var(--bdr)">Esc</kbd>
+      </div>
+      <div id="gsResults" style="overflow-y:auto;max-height:calc(70vh - 60px)"></div>
+    </div>
+  </div>
+
+
+  <!-- Onboarding Modal -->
+  <div class="modal-wrap hidden" id="onboardingModal" role="dialog" aria-modal="true">
+    <div class="modal" style="max-width:420px;text-align:center">
+      <div id="onboardContent"></div>
+    </div>
+  </div>
+
+<!-- BOTÃO FLUTUANTE DA ASSISTENTE IA -->
+<div id="aiFloatBtn" title="Assistente IA — arraste para reposicionar"
+  style="position:fixed;bottom:28px;right:24px;z-index:900;cursor:grab;user-select:none;touch-action:none">
+  <button onclick="openAIAssistant()" id="aiFloatInner"
+    style="width:52px;height:52px;border-radius:50%;background:var(--accent);border:none;color:#fff;
+           font-size:1.3rem;box-shadow:0 4px 18px rgba(0,0,0,.22);cursor:pointer;
+           display:flex;align-items:center;justify-content:center;transition:transform .15s,box-shadow .15s;
+           position:relative">
+    <i class="fas fa-robot"></i>
+    <span id="aiFloatDot"
+      style="position:absolute;top:3px;right:3px;width:10px;height:10px;border-radius:50%;
+             background:#22c55e;border:2px solid #fff;display:none"></span>
+  </button>
+  <div id="aiFloatLabel"
+    style="position:absolute;bottom:calc(100% + 6px);right:0;background:rgba(0,0,0,.72);color:#fff;
+           font-size:.7rem;padding:3px 8px;border-radius:6px;white-space:nowrap;pointer-events:none;
+           opacity:0;transition:opacity .2s">Assistente IA</div>
+</div>
+  <!-- Extensions + AI Pro (carregados após app.js) -->
+
+  <!-- FinancePro Modules — ordem correta de dependências -->
+  <!-- 1. Manutenção e infraestrutura -->
+  <script src="fp-ai-maintenance.js" defer></script>
+
+  <!-- 2. Extensões core (notificações, gamificação, backup, biometria) -->
+  <script src="fp-extensions.js" defer></script>
+
+  <!-- 3. Importação/Exportação Pro -->
+  <script src="fp-import-pro.js" defer></script>
+
+  <!-- 4. LLM Pro (wllama + Ollama + cache IndexedDB) -->
+  <script src="fp-llm-pro.js" defer></script>
+
+  <!-- 5. AI Pro (auto-cat, insights, chat, NL commands) -->
+  <script src="fp-ai-pro.js" defer></script>
+  <script src="fp-ai-pro-v3.js" defer></script>
+
+  <!-- 6. Melhorias IA 1-10 (simulador, desafios, relatórios, ML, fraude) -->
+  <script src="fp-ai-melhorias-1-5.js" defer></script>
+  <script src="fp-ai-melhorias-6-10.js" defer></script>
+
+  <!-- 6.5 Simulador v2 -->
+  <script src="fp-simulator-v2.js" defer></script>
+  <!-- 7. Budget Pro + Controle Financeiro v3 -->
+  <script src="fp-budget-pro.js" defer></script>
+  <script src="fp-controle-v3.js" defer></script>
+  <script src="fp-controle-financeiro.js" defer></script>
+
+  <!-- 8. Melhorias do Sistema (modal regras, widgets dashboard) -->
+  <script src="fp-melhorias-sistema.js" defer></script>
+
+  <!-- 9. Módulos das páginas novas -->
+  <script src="fp-challenges.js" defer></script>
+  <script src="fp-fraud.js" defer></script>
+  <script src="fp-education.js" defer></script>
+  <script src="fp-benchmark.js" defer></script>
+  <!-- 10. Core Bus: event bus + task manager (must load before integrador) -->
+  <script src="fp-core-bus.js" defer></script>
+  <!-- 11. Integrador Mestre (conecta todos os módulos) -->
+  <script src="fp-integrador.js" defer></script>
+  <!-- 12. Telemetria: coleta eventos e grava em IndexedDB -->
+  <script src="fp-telemetry.js" defer></script>
+  <!-- 13. Activity indicator (visual) -->
+  <script src="fp-activity-indicator.js" defer></script>
+
+  <!-- Task panel markup -->
+  <div id="taskPanel" class="task-panel card">
+    <div class="card-hdr">
+      <span class="card-title"><i class="fas fa-tasks"></i> Tarefas em background</span>
+      <button class="btn btn-ghost btn-xs" data-close title="Fechar">Fechar</button>
+    </div>
+    <div class="card-body task-panel-body">
+      <div class="task-list"></div>
+      <div class="task-panel-footer">Painel de jobs do TaskManager</div>
+    </div>
+  </div>
+  <style>
+  .task-panel{position:fixed;right:1rem;top:72px;width:360px;max-height:72vh;background:var(--surf);border:1px solid var(--bdr);box-shadow:var(--shadow-lg);border-radius:16px;padding:0;z-index:220;overflow:hidden;opacity:0;transform:translateY(-12px);pointer-events:none;transition:all .2s ease}
+  .task-panel.open{opacity:1;transform:translateY(0);pointer-events:auto}
+  .task-panel-body{display:flex;flex-direction:column;gap:.85rem;max-height:calc(72vh - 72px);overflow:hidden;padding:1rem}
+  .task-list{display:flex;flex-direction:column;gap:.75rem;overflow:auto;padding-right:4px}
+  .task-row{display:flex;flex-direction:column;gap:.55rem;padding:.9rem 1rem;border-radius:14px;border:1px solid var(--bdr);background:rgba(var(--accent-rgb),.04)}
+  .task-row[data-status="running"]{background:rgba(16,185,129,.08)}
+  .task-row[data-status="scheduled"]{background:rgba(59,130,246,.08)}
+  .task-row-header{display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem}
+  .task-left{display:flex;flex-direction:column;gap:.25rem}
+  .task-title{font-size:.95rem}
+  .task-icon{width:12px;height:12px;border-radius:50%;display:inline-block;flex-shrink:0;background:var(--accent)}
+  .task-row[data-status="scheduled"] .task-icon{background:var(--info)}
+  .task-row[data-status="running"] .task-icon{background:var(--success)}
+  .task-row-header .task-right{display:flex;align-items:center;gap:.45rem}
+  .task-meta{font-size:.78rem;color:var(--txt2)}
+  .task-progress-bar{position:relative;overflow:hidden;border-radius:999px;background:var(--bdr);height:8px}
+  .task-progress{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-d));transition:width .2s ease}
+  .task-empty{padding:1rem;border-radius:12px;background:var(--bg-s);color:var(--txt2);font-size:.9rem;text-align:center}
+  .task-panel-footer{font-size:.78rem;color:var(--txt2);padding-top:.5rem;border-top:1px solid var(--bdr)}
+  @media (max-width:900px){
+    .task-panel{left:0;right:0;bottom:0;top:auto;width:100%;max-height:44vh;border-radius:16px 16px 0 0;}
+    .task-panel.open{transform:translateY(0);}
+    .task-panel-body{max-height:calc(44vh - 72px);padding:1rem .9rem .9rem;}
+    .task-list{padding-right:0;}
+  }
+  @media (max-width:600px){
+    .task-panel{max-height:52vh;}
+    .task-row{padding:.8rem;}
+    .task-row-header{flex-direction:column;align-items:flex-start;}
+    .task-right{width:100%;justify-content:flex-start;}
+  }
+  </style>
+
+  <!-- ══ FP-CORE-PAGES: páginas definitivas + polling ══ -->
+  <!-- Progress/Tasks/Suggestions UI -->
+  <script src="fp-progress-bar.js" defer></script>
+  <script src="fp-task-panel.js" defer></script>
+  <script src="fp-suggestions.js" defer></script>
+  <script src="fp-categories-enhance.js" defer></script>
+  <script src="fp-core-pages.js" defer></script>
+  <!-- Safety net inline: chama o polling imediatamente após window.load -->
+  <script>
+  window.addEventListener('load',function(){
+    var prev='';
+    var loaders={'page-challenges':'loadChallenges','page-anomalies':'loadAnomalies','page-education':'loadEducation','page-benchmark':'loadBenchmark'};
+    setInterval(function(){
+      try{
+        var a=document.querySelector('.page.active');
+        if(!a)return;
+        if(a.id===prev)return;
+        prev=a.id;
+        var fn=loaders[a.id];
+        if(fn&&typeof window[fn]==='function'){
+          console.log('[SAFETY] chamando',fn);
+          window[fn]();
+        }
+      }catch(e){console.warn('[SAFETY]',e);}
+    },300);
+  });
+  </script>
+</body>
+</html>

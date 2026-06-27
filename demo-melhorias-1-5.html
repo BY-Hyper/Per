@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinancePro — Demo Melhorias IA v1-5</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+      line-height: 1.6;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+
+    header p {
+      font-size: 1.1em;
+      opacity: 0.9;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      padding: 40px;
+    }
+
+    .feature-card {
+      background: #f8f9fa;
+      border-left: 4px solid #667eea;
+      border-radius: 8px;
+      padding: 20px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.1);
+    }
+
+    .feature-card h3 {
+      color: #667eea;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .feature-card .icon {
+      font-size: 1.5em;
+    }
+
+    .feature-card p {
+      color: #666;
+      margin-bottom: 15px;
+      font-size: 0.95em;
+    }
+
+    .feature-card .complexity {
+      display: inline-block;
+      background: #e0e0e0;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      color: #666;
+      margin-bottom: 15px;
+    }
+
+    .demo-section {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 10px;
+    }
+
+    .demo-section h4 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 0.95em;
+    }
+
+    .code-block {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 12px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85em;
+      overflow-x: auto;
+      line-height: 1.4;
+    }
+
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9em;
+      margin-top: 10px;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #764ba2;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 0.9em;
+      margin-bottom: 10px;
+    }
+
+    .results {
+      background: #f0f7ff;
+      border: 1px solid #bde0ff;
+      border-radius: 4px;
+      padding: 15px;
+      margin-top: 15px;
+      color: #004085;
+      font-size: 0.95em;
+      line-height: 1.6;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+
+    .status-complete {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    footer {
+      background: #f8f9fa;
+      padding: 20px;
+      text-align: center;
+      color: #666;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .integration-info {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      border-radius: 4px;
+      padding: 15px;
+      margin: 20px;
+      color: #856404;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🚀 FinancePro — Melhorias IA v1-5</h1>
+      <p>Implementação Completa de 5 Melhorias Inteligentes para Análise Financeira</p>
+    </header>
+
+    <div class="integration-info">
+      <strong>ℹ️ Integração:</strong> Adicione <code>&lt;script src="fp-ai-melhorias-1-5.js"&gt;&lt;/script&gt;</code> ao seu HTML
+    </div>
+
+    <div class="content">
+      <!-- Feature 1 -->
+      <div class="feature-card">
+        <h3>
+          <span class="icon">🔮</span>
+          1. Simulador de Cenários
+        </h3>
+        <p>Simule o impacto de redução de gastos ou aumento de renda ao longo do tempo.</p>
+        <span class="complexity">⭐⭐ Fácil</span>
+        <div class="demo-section">
+          <h4>Teste:</h4>
+          <input type="number" id="scenario-reduction" placeholder="Redução %" value="15" min="0" max="100" step="5">
+          <input type="number" id="scenario-income" placeholder="Aumento Renda (R$)" value="500" min="0" step="100">
+          <input type="number" id="scenario-months" placeholder="Meses" value="12" min="1" max="120" step="1">
+          <button onclick="runScenario()">Simular</button>
+          <div id="scenario-results"></div>
+        </div>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="feature-card">
+        <h3>
+          <span class="icon">🏆</span>
+          2. Desafios Inteligentes
+        </h3>
+        <p>Sistema de desafios automáticos baseado no perfil de gastos do usuário.</p>
+        <span class="complexity">⭐⭐⭐ Médio</span>
+        <div class="demo-section">
+          <h4>Teste:</h4>
+          <button onclick="generateChallenges()">Gerar Desafios</button>
+          <div id="challenges-results"></div>
+        </div>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="feature-card">
+        <h3>
+          <span class="icon">📊</span>
+          3. Relatório Automático
+        </h3>
+        <p>Gera relatórios profissionais em HTML, CSV ou JSON.</p>
+        <span class="complexity">⭐⭐⭐⭐ Alto</span>
+        <div class="demo-section">
+          <h4>Teste:</h4>
+          <button onclick="generateReport('json')">JSON</button>
+          <button onclick="generateReport('html')">HTML</button>
+          <button onclick="generateReport('csv')">CSV</button>
+          <div id="report-results"></div>
+        </div>
+      </div>
+
+      <!-- Feature 4 -->
+      <div class="feature-card">
+        <h3>
+          <span class="icon">🤖</span>
+          4. ML — Previsão Categoria
+        </h3>
+        <p>Prevê categoria de transação baseada em descrição com IA local.</p>
+        <span class="complexity">⭐⭐⭐⭐⭐ Muito Alto</span>
+        <div class="demo-section">
+          <h4>Teste:</h4>
+          <input type="text" id="description-input" placeholder="Ex: compra no mc donalds" value="compra mercado">
+          <button onclick="predictCategory()">Prever</button>
+          <div id="prediction-results"></div>
+        </div>
+      </div>
+
+      <!-- Feature 5 -->
+      <div class="feature-card">
+        <h3>
+          <span class="icon">💳</span>
+          5. Detector Fraude
+        </h3>
+        <p>Detecta anomalias e transações suspeitas em tempo real.</p>
+        <span class="complexity">⭐⭐⭐⭐ Alto</span>
+        <div class="demo-section">
+          <h4>Teste:</h4>
+          <input type="number" id="fraud-amount" placeholder="Valor (R$)" value="500">
+          <select id="fraud-category" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+            <option>Alimentação</option>
+            <option>Transporte</option>
+            <option>Moradia</option>
+          </select>
+          <button onclick="detectFraud()">Verificar</button>
+          <div id="fraud-results"></div>
+        </div>
+      </div>
+
+      <!-- API Reference -->
+      <div class="feature-card">
+        <h3>
+          <span class="icon">📚</span>
+          API Reference
+        </h3>
+        <p>Referência rápida para usar as APIs:</p>
+        <div class="demo-section">
+          <h4>Simulador:</h4>
+          <div class="code-block">
+await FP_AI_Improvements.scenarios
+  .simulateScenario(15, 500, 12);
+          </div>
+
+          <h4 style="margin-top: 15px;">Desafios:</h4>
+          <div class="code-block">
+await FP_AI_Improvements.challenges
+  .generateChallenges();
+          </div>
+
+          <h4 style="margin-top: 15px;">ML Predictor:</h4>
+          <div class="code-block">
+await FP_AI_Improvements.mlPredictor
+  .predict('descrição da transação');
+          </div>
+
+          <h4 style="margin-top: 15px;">Fraude:</h4>
+          <div class="code-block">
+await FP_AI_Improvements.fraud
+  .detectAnomalies(transactionObj);
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p><strong>FinancePro — Melhorias IA v1.0</strong></p>
+      <p>Implementação completa das 5 primeiras melhorias | Pronto para produção</p>
+      <p style="margin-top: 10px; font-size: 0.9em;">
+        <span class="status-badge status-complete">✅ Implementado</span>
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    // Mock database para demonstração
+    window.db = {
+      transactions: {
+        toArray: async function() {
+          return [
+            // Alimentação
+            { id: '1', date: '2026-05-01T10:00:00', description: 'Mercado', amount: 150, category: 'Alimentação', type: 'expense' },
+            { id: '2', date: '2026-05-02T12:30:00', description: 'Lanche', amount: 45, category: 'Alimentação', type: 'expense' },
+            { id: '3', date: '2026-05-03T19:00:00', description: 'Restaurante', amount: 120, category: 'Alimentação', type: 'expense' },
+            // Transporte
+            { id: '4', date: '2026-05-01T08:00:00', description: 'Uber SP', amount: 35, category: 'Transporte', type: 'expense' },
+            { id: '5', date: '2026-05-02T17:30:00', description: 'Combustível', amount: 200, category: 'Transporte', type: 'expense' },
+            // Moradia
+            { id: '6', date: '2026-05-05T10:00:00', description: 'Aluguel', amount: 1500, category: 'Moradia', type: 'expense' },
+            { id: '7', date: '2026-05-06T14:00:00', description: 'Luz', amount: 250, category: 'Moradia', type: 'expense' },
+            // Renda
+            { id: '8', date: '2026-05-01T00:00:00', description: 'Salário', amount: 5000, category: 'Salário', type: 'income' },
+          ];
+        }
+      },
+      challenges: {
+        get: async function() { return null; }
+      }
+    };
+
+    window.S = { user: { id: 'demo' } };
+
+    // Funções de teste
+    async function runScenario() {
+      const reduction = parseInt(document.getElementById('scenario-reduction').value) || 0;
+      const income = parseInt(document.getElementById('scenario-income').value) || 0;
+      const months = parseInt(document.getElementById('scenario-months').value) || 12;
+
+      if (window.FP_AI_Improvements?.scenarios?.simulateScenario) {
+        const result = await window.FP_AI_Improvements.scenarios.simulateScenario(reduction, income, months);
+
+        let html = '<div class="results">';
+        html += `<strong>💼 Simulação: ${reduction}% redução, +R$${income}/mês</strong><br>`;
+        html += `Mês 1: Saldo ${result.projections[0].monthlyBalance.toFixed(2)}<br>`;
+        html += `Mês ${months}: Saldo ${result.projections[months-1].monthlyBalance.toFixed(2)}<br>`;
+        html += `Total Acumulado: R$ ${result.totalAccumulated.toFixed(2)}<br>`;
+        html += `Taxa Poupança: ${result.projections[0].savingsRate}%`;
+        html += '</div>';
+        document.getElementById('scenario-results').innerHTML = html;
+      }
+    }
+
+    async function generateChallenges() {
+      if (window.FP_AI_Improvements?.challenges?.generateChallenges) {
+        const challenges = await window.FP_AI_Improvements.challenges.generateChallenges();
+
+        let html = '<div class="results">';
+        challenges.forEach(c => {
+          html += `<strong>${c.icon} ${c.title}</strong><br>`;
+          html += `${c.description} | ${c.reward} pts<br><br>`;
+        });
+        html += '</div>';
+        document.getElementById('challenges-results').innerHTML = html;
+      }
+    }
+
+    async function generateReport(format) {
+      if (window.FP_AI_Improvements?.reports?.generateReport) {
+        const result = await window.FP_AI_Improvements.reports.generateReport(format);
+
+        let html = '<div class="results">';
+        if (format === 'json') {
+          html += `<pre>${JSON.stringify(result, null, 2).substring(0, 300)}...</pre>`;
+        } else if (format === 'html') {
+          html += `<strong>✅ Relatório HTML gerado</strong><br>Pronto para imprimir/compartilhar`;
+        } else if (format === 'csv') {
+          html += `<strong>✅ Arquivo CSV gerado</strong><br>${result.substring(0, 200)}...`;
+        }
+        html += '</div>';
+        document.getElementById('report-results').innerHTML = html;
+      }
+    }
+
+    async function predictCategory() {
+      const text = document.getElementById('description-input').value;
+      if (window.FP_AI_Improvements?.mlPredictor?.predict) {
+        const pred = await window.FP_AI_Improvements.mlPredictor.predict(text);
+
+        let html = '<div class="results">';
+        if (pred) {
+          html += `<strong>🎯 Categoria: ${pred.category}</strong><br>`;
+          html += `Confiança: ${pred.confidence.toFixed(0)}%<br>`;
+          if (pred.alternatives?.length) {
+            html += `<br>Alternativas:<br>`;
+            pred.alternatives.forEach(alt => {
+              html += `• ${alt.category} (${alt.confidence.toFixed(0)}%)<br>`;
+            });
+          }
+        } else {
+          html += '⚠️ Sem predição com dados disponíveis';
+        }
+        html += '</div>';
+        document.getElementById('prediction-results').innerHTML = html;
+      }
+    }
+
+    async function detectFraud() {
+      const amount = parseFloat(document.getElementById('fraud-amount').value);
+      const category = document.getElementById('fraud-category').value;
+
+      if (window.FP_AI_Improvements?.fraud?.detectAnomalies) {
+        const tx = {
+          id: 'demo-tx',
+          date: new Date().toISOString(),
+          amount,
+          category,
+          type: 'expense'
+        };
+
+        const detection = await window.FP_AI_Improvements.fraud.detectAnomalies(tx);
+
+        let html = '<div class="results">';
+        html += `<strong>Risco Score: ${detection.riskScore}/15</strong><br>`;
+        if (detection.anomalies.length === 0) {
+          html += '✅ Transação normal';
+        } else {
+          html += 'Anomalias detectadas:<br>';
+          detection.anomalies.forEach(a => {
+            html += `${a.icon} [${a.severity}] ${a.message}<br>`;
+          });
+        }
+        html += '</div>';
+        document.getElementById('fraud-results').innerHTML = html;
+      }
+    }
+
+    // Inicializar quando disponível
+    window.addEventListener('load', async () => {
+      if (window.FP_AI_Improvements?.initialize) {
+        await window.FP_AI_Improvements.initialize();
+        console.log('✅ FinancePro IA Melhorias carregado');
+      }
+    });
+  </script>
+
+  <!-- Carrega o módulo de melhorias -->
+  <script src="fp-ai-melhorias-1-5.js"></script>
+</body>
+</html>
