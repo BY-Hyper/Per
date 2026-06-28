@@ -1,5 +1,5 @@
 /* ====================================================================
-   FINANCEPRO — EDUCAÇÃO FINANCEIRA
+   FINANCEPRO — EDUCAÇÃO FINANCEIRA v2
    Módulos interativos 100% offline, quiz adaptativo ao perfil.
    Expõe: window.loadEducation
 ==================================================================== */
@@ -124,6 +124,19 @@
 </div>`,
           quiz: [{ q: 'O principal benefício da diversificação é:', opts: ['Garantir lucro','Reduzir riscos','Aumentar impostos','Complicar a gestão'], ans: 1 }]
         },
+        { id: 'fiis_intro', title: 'Introdução a FIIs', duration: '5 min',
+          content: `<h3>Fundos de Investimento Imobiliário</h3>
+<p>FIIs permitem investir em imóveis sem precisar comprar um imóvel inteiro.</p>
+<ul>
+<li><strong>Vantagens:</strong> Isenção IR (pessoa física), dividendos mensais, liquidez</li>
+<li><strong>Tipos:</strong> Tijolo (imóveis físicos), Papel (CRI), Fundo de Fundos</li>
+<li><strong>Como começar:</strong> Abra conta em corretora, compre cotas na bolsa</li>
+</ul>
+<div class="edu-example">
+  <strong>Exemplo:</strong> FII HGLG11 pagou ~R$ 1,20/cota em 2024 (yield ~10% a.a.)
+</div>`,
+          quiz: [{ q: 'Qual vantagem dos FIIs para pessoa física?', opts: ['Lucro garantido','Isenção de IR nos dividendos','Sem risco','Liquidez imediata'], ans: 1 }]
+        },
       ]
     },
     {
@@ -152,6 +165,49 @@
 </ul>
 <p>🧘 <strong>Solução:</strong> Tenha um plano e siga-o, independente das emoções do momento.</p>`,
           quiz: [{ q: 'O sucesso financeiro depende principalmente de:', opts: ['Sorte','Herança','Comportamento e disciplina','Renda alta'], ans: 2 }]
+        },
+        { id: 'goals_setting', title: 'Definindo Metas SMART', duration: '4 min',
+          content: `<h3>Metas SMART</h3>
+<p>Metas financeiras devem ser SMART:</p>
+<ul>
+<li><strong>S</strong>pecífica: "Guardar R$ 10.000" (não apenas "economizar")</li>
+<li><strong>M</strongensurável: acompanhe o progresso semanalmente</li>
+<li><strong>A</strong>tingível: considere sua realidade financeira</li>
+<li><strong>R</strong>elevante: alinhe com seus valores e sonhos</li>
+<li><strong>T</strong>emporal: defina prazo (ex: "até dezembro/2025")</li>
+</ul>
+<div class="edu-example">
+  <strong>Exemplo SMART:</strong> "Guardar R$ 500/mês por 20 meses para entrada de carro até ago/2026"
+</div>`,
+          quiz: [{ q: 'Na metodologia SMART, o "T" significa:', opts: ['Técnico','Temporal','Total','Teórico'], ans: 1 }]
+        },
+      ]
+    },
+    {
+      id: 'advanced', icon: '🚀', color: '#f59e0b', title: 'Avançado',
+      lessons: [
+        { id: 'taxes', title: 'Impostos em Investimentos', duration: '6 min',
+          content: `<h3>Tributação de Investimentos</h3>
+<p>Conheça as principais regras:</p>
+<ul>
+<li><strong>Renda Fixa:</strong> IR regressivo (22,5% a 15%) sobre lucros</li>
+<li><strong>Ações:</strong> 15% IR sobre ganhos > R$ 20k/mês (vendas)</li>
+<li><strong>FIIs:</strong> isento IR para PF nos dividendos</li>
+<li><strong>Tesouro Direto:</strong> IR regressivo + IOF (se < 30 dias)</li>
+</ul>
+<p>⚠️ <strong>Atenção:</strong> Day trade tem alíquota fixa de 20%!</p>`,
+          quiz: [{ q: 'Qual alíquota de IR para day trade?', opts: ['15%','17,5%','20%','22,5%'], ans: 2 }]
+        },
+        { id: 'asset_allocation', title: 'Alocação de Ativos', duration: '5 min',
+          content: `<h3>Estratégia de Alocação</h3>
+<p>Distribua seu patrimônio entre diferentes classes:</p>
+<div class="edu-example">
+  <strong>Perfil Conservador:</strong> 80% RF, 15% Ações, 5% Internacional<br>
+  <strong>Perfil Moderado:</strong> 60% RF, 30% Ações, 10% Internacional<br>
+  <strong>Perfil Arrojado:</strong> 40% RF, 45% Ações, 15% Internacional
+</div>
+<p>🔄 <strong>Rebalanceamento:</strong> Ajuste anualmente para manter alocação original.</p>`,
+          quiz: [{ q: 'O rebalanceamento serve para:', opts: ['Maximizar lucros','Manter alocação original','Reduzir impostos','Evitar vendas'], ans: 1 }]
         },
       ]
     },
