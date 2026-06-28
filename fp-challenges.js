@@ -17,19 +17,27 @@
     { id: 'tx_10',       icon: '📊', name: '10 transações',        desc: '10 transações registradas',            xp: 100, check: d => d.totalTxs >= 10 },
     { id: 'tx_50',       icon: '🏅', name: '50 transações',        desc: '50 transações registradas',            xp: 200, check: d => d.totalTxs >= 50 },
     { id: 'tx_100',      icon: '🥇', name: '100 transações',       desc: '100 transações registradas',           xp: 400, check: d => d.totalTxs >= 100 },
+    { id: 'tx_500',      icon: '👑', name: 'Mestre dos registros', desc: '500 transações registradas',           xp: 800, check: d => d.totalTxs >= 500 },
     { id: 'budget_set',  icon: '🎯', name: 'Orçamento definido',   desc: 'Criou ao menos 1 limite mensal',       xp: 75,  check: d => d.budgets >= 1 },
     { id: 'budget_3',    icon: '📋', name: 'Mestre do orçamento',  desc: 'Criou 3 ou mais limites mensais',      xp: 150, check: d => d.budgets >= 3 },
+    { id: 'budget_5',    icon: '🏆', name: 'Guru do orçamento',    desc: 'Criou 5 ou mais limites mensais',      xp: 300, check: d => d.budgets >= 5 },
     { id: 'goal_set',    icon: '🌟', name: 'Sonhador',             desc: 'Criou uma meta financeira',            xp: 100, check: d => d.goals >= 1 },
+    { id: 'goal_3',      icon: '🎪', name: 'Visionário',           desc: 'Criou 3 metas financeiras',            xp: 200, check: d => d.goals >= 3 },
     { id: 'saver_10',    icon: '🐷', name: 'Poupador',             desc: 'Mês com taxa de poupança ≥ 10%',       xp: 150, check: d => d.savingRate >= 10 },
     { id: 'saver_20',    icon: '💎', name: 'Poupador Pro',         desc: 'Mês com taxa de poupança ≥ 20%',       xp: 300, check: d => d.savingRate >= 20 },
+    { id: 'saver_30',    icon: '👑', name: 'Mestre da Poupança',   desc: 'Mês com taxa de poupança ≥ 30%',       xp: 500, check: d => d.savingRate >= 30 },
     { id: 'streak_3',    icon: '🔥', name: 'Sequência de 3',       desc: '3 dias seguidos com registros',        xp: 100, check: d => d.streak >= 3 },
     { id: 'streak_7',    icon: '🌈', name: 'Semana completa',      desc: '7 dias seguidos com registros',        xp: 250, check: d => d.streak >= 7 },
+    { id: 'streak_15',   icon: '⭐', name: 'Quinzena de ouro',     desc: '15 dias seguidos com registros',       xp: 400, check: d => d.streak >= 15 },
     { id: 'streak_30',   icon: '🚀', name: 'Mês perfeito',         desc: '30 dias seguidos com registros',       xp: 500, check: d => d.streak >= 30 },
+    { id: 'streak_90',   icon: '👑', name: 'Lenda do streak',      desc: '90 dias seguidos com registros',       xp: 1000, check: d => d.streak >= 90 },
     { id: 'cat_rules',   icon: '🤖', name: 'Regras inteligentes',  desc: 'Criou 5 regras de categorização',      xp: 200, check: d => d.rules >= 5 },
     { id: 'import',      icon: '📥', name: 'Importador',           desc: 'Importou um extrato bancário',         xp: 150, check: d => d.imported >= 1 },
     { id: 'positive',    icon: '✅', name: 'Mês positivo',         desc: 'Fechou o mês com saldo positivo',      xp: 200, check: d => d.monthPositive },
     { id: 'categories',  icon: '🏷️',  name: 'Organizado',          desc: 'Tem 5 ou mais categorias configuradas',xp: 75,  check: d => d.catCount >= 5 },
     { id: 'no_overbudget',icon: '🛡️', name: 'Controlado',          desc: 'Nenhum orçamento estourado no mês',    xp: 250, check: d => d.budgets >= 1 && d.overBudget === 0 },
+    { id: 'edu_complete',icon: '🎓', name: 'Estudante',            desc: 'Completou 5 lições de educação',       xp: 200, check: d => d.eduLessons >= 5 },
+    { id: 'challenge_done',icon: '⚡',name: 'Desafiante',          desc: 'Completou 3 desafios',                 xp: 250, check: d => d.challengesDone >= 3 },
   ];
 
   /* ── Carrega dados para gerar desafios e conquistar ── */
@@ -80,9 +88,17 @@
       last60[key] = txs.filter(t => t.date.slice(0, 10) === key).length;
     }
 
-    // XP e nível (salvo em settings)
+    // XP e nível (salvo em settings) + lições de educação completas
     let xpData = { xp: 0, level: 1, earned: [] };
     try { xpData = await window.getSetting?.(uid, 'fp_gamification', xpData) || xpData; } catch(e) {}
+    
+    // Carregar progresso da educação financeira
+    let eduProgress = {};
+    try { eduProgress = await window.getSetting?.(uid, 'fp_edu_progress', {}) || {}; } catch(e) {}
+    const eduLessons = Object.keys(eduProgress.progress || {}).length;
+    
+    // Desafios completados
+    const challengesDone = xpData.challengesDone || 0;
 
     return {
       uid, txs, curTxs, cI, cE, savingRate,
@@ -97,6 +113,8 @@
       monthPositive: cI > cE,
       streak, last60, xpData,
       month,
+      eduLessons,
+      challengesDone,
     };
   }
 
