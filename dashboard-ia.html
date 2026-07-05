@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinancePro — IA Pro Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Outfit', -apple-system, sans-serif;
+      background: #f0f2f6;
+      padding: 20px;
+      color: #111827;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 {
+      margin-bottom: 20px;
+      color: #10b981;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    h1::before { content: '🤖'; font-size: 1.5em; }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      border: 1px solid #e5e7eb;
+    }
+    
+    .card h2 {
+      font-size: 14px;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .status-ok { color: #10b981; }
+    .status-warn { color: #f59e0b; }
+    .status-error { color: #ef4444; }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .badge-ok { background: #d1fae5; color: #065f46; }
+    .badge-warn { background: #fef3c7; color: #92400e; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #10b981;
+      margin: 8px 0;
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #e5e7eb;
+      border-radius: 3px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: #10b981;
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    
+    th {
+      background: #f9fafb;
+      padding: 8px;
+      text-align: left;
+      font-weight: 600;
+      color: #6b7280;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    td {
+      padding: 8px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .button {
+      display: inline-block;
+      padding: 8px 16px;
+      background: #10b981;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      margin: 4px 4px 4px 0;
+      transition: background 0.2s;
+    }
+    
+    .button:hover { background: #059669; }
+    .button:disabled { background: #d1d5db; cursor: not-allowed; }
+    
+    .controls {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    
+    .warning-box {
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      padding: 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin: 12px 0;
+    }
+    
+    .error-box {
+      background: #fef2f2;
+      border-left: 4px solid #ef4444;
+      padding: 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin: 12px 0;
+    }
+    
+    .info-box {
+      background: #ecfdf5;
+      border-left: 4px solid #10b981;
+      padding: 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin: 12px 0;
+    }
+    
+    .timestamp {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-top: 12px;
+    }
+    
+    .loading { opacity: 0.6; }
+    
+    #logs {
+      max-height: 400px;
+      overflow-y: auto;
+      background: #f9fafb;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .log-line {
+      padding: 4px;
+      margin: 2px 0;
+      border-left: 2px solid #e5e7eb;
+      padding-left: 8px;
+    }
+    
+    .log-error { border-color: #ef4444; color: #991b1b; }
+    .log-warn { border-color: #f59e0b; color: #92400e; }
+    .log-info { border-color: #10b981; color: #065f46; }
+    .log-debug { border-color: #3b82f6; color: #1e40af; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>IA Pro Dashboard</h1>
+    
+    <!-- Health Status -->
+    <div class="grid">
+      <div class="card">
+        <h2>🏥 Database</h2>
+        <div id="dbStatus" class="status-badge badge-ok">Verificando...</div>
+        <div class="stat-value" id="dbCount">-</div>
+        <div class="stat-label">Transações</div>
+      </div>
+      
+      <div class="card">
+        <h2>🤖 LocalAI</h2>
+        <div id="aiStatus" class="status-badge badge-warn">Verificando...</div>
+        <div id="aiClassify">-</div>
+        <div id="aiTrain">-</div>
+      </div>
+      
+      <div class="card">
+        <h2>🧠 LLM</h2>
+        <div id="llmStatus" class="status-badge badge-warn">Verificando...</div>
+        <div id="llmModel">-</div>
+        <div class="stat-label">Modelo</div>
+      </div>
+      
+      <div class="card">
+        <h2>💾 Memory</h2>
+        <div id="memUsed">-</div>
+        <div id="memTotal">-</div>
+        <div class="stat-label">Uso de Heap</div>
+      </div>
+      
+      <div class="card">
+        <h2>👁️ Observers</h2>
+        <div class="stat-value" id="observerCount">-</div>
+        <div class="stat-label">Observadores Ativos</div>
+      </div>
+      
+      <div class="card">
+        <h2>📊 Accuracy</h2>
+        <div class="stat-value" id="accuracy">-</div>
+        <div id="accuracyDetail"></div>
+      </div>
+    </div>
+    
+    <!-- Rate Limits -->
+    <div class="card">
+      <h2>⏱️ Rate Limits (por minuto)</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Operação</th>
+            <th>Usado</th>
+            <th>Limite</th>
+            <th>Disponível</th>
+            <th>Reset em</th>
+          </tr>
+        </thead>
+        <tbody id="rateLimitTable">
+          <tr><td colspan="5">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Logs -->
+    <div class="card">
+      <h2>📝 Logs Recentes</h2>
+      <div class="controls">
+        <button class="button" onclick="refreshLogs()">🔄 Atualizar</button>
+        <button class="button" onclick="clearLogs()">🗑️ Limpar</button>
+        <select id="logLevel" onchange="refreshLogs()" style="padding: 8px; border: 1px solid #d1d5db; border-radius: 6px;">
+          <option value="DEBUG">DEBUG</option>
+          <option value="INFO">INFO</option>
+          <option value="WARN">WARN</option>
+          <option value="ERROR">ERROR</option>
+        </select>
+      </div>
+      <div id="logs"></div>
+    </div>
+    
+    <!-- Feedback -->
+    <div class="card">
+      <h2>🎓 Feedback de Classificações</h2>
+      <div id="feedbackStats"></div>
+    </div>
+    
+    <!-- Actions -->
+    <div class="card">
+      <h2>🔧 Ações</h2>
+      <div class="controls">
+        <button class="button" onclick="runHealthCheck()">🏥 Health Check</button>
+        <button class="button" onclick="exportDiagnostics()">📥 Exportar Diagnósticos</button>
+        <button class="button" onclick="clearOldLogs()">🧹 Limpar Logs Antigos</button>
+        <button class="button" onclick="resetRateLimits()">🔄 Reset Rate Limits</button>
+      </div>
+    </div>
+    
+    <!-- Warnings -->
+    <div id="warnings"></div>
+  </div>
+
+  <script>
+    // Verificar se FP_AI_MAINTENANCE está disponível
+    function checkAvailability() {
+      if (!window.FP_AI_MAINTENANCE) {
+        document.querySelector('.container').innerHTML = `
+          <div class="error-box">
+            ⚠️ FP_AI_MAINTENANCE não está carregado.
+            <br>Certifique-se de que fp-ai-maintenance.js está incluído ANTES de fp-ai-pro.js no index.html.
+          </div>
+        `;
+        return false;
+      }
+      return true;
+    }
+
+    // Atualizar dashboard
+    async function updateDashboard() {
+      if (!checkAvailability()) return;
+
+      try {
+        const health = await window.FP_AI_MAINTENANCE.HealthMonitor.runAllChecks();
+        
+        // Database
+        document.getElementById('dbStatus').textContent = 
+          health.database.status === 'OK' ? '✅ OK' : '❌ ' + health.database.status;
+        document.getElementById('dbStatus').className = 
+          'status-badge ' + (health.database.status === 'OK' ? 'badge-ok' : 'badge-error');
+        document.getElementById('dbCount').textContent = health.database.dbCount || '-';
+        
+        // LocalAI
+        document.getElementById('aiStatus').textContent = 
+          health.localai.status === 'OK' ? '✅ OK' : 
+          health.localai.status === 'PARTIAL' ? '⚠️ PARTIAL' : '❌ ERROR';
+        document.getElementById('aiStatus').className = 
+          'status-badge ' + (health.localai.status === 'OK' ? 'badge-ok' : 
+          health.localai.status === 'PARTIAL' ? 'badge-warn' : 'badge-error');
+        document.getElementById('aiClassify').innerHTML = 
+          `${health.localai.hasClassify ? '✅' : '❌'} Classify`;
+        document.getElementById('aiTrain').innerHTML = 
+          `${health.localai.hasTrain ? '✅' : '❌'} Train`;
+        
+        // LLM
+        document.getElementById('llmStatus').textContent = 
+          health.llm.status === 'OK' ? '✅ Ready' : 
+          health.llm.status === 'LOADING' ? '⏳ Loading' : '❌ Error';
+        document.getElementById('llmStatus').className = 
+          'status-badge ' + (health.llm.status === 'OK' ? 'badge-ok' : 
+          health.llm.status === 'LOADING' ? 'badge-warn' : 'badge-error');
+        document.getElementById('llmModel').innerHTML = 
+          health.llm.modelName ? `📦 ${health.llm.modelName}` : 'Nenhum modelo';
+        
+        // Memory
+        document.getElementById('memUsed').innerHTML = 
+          health.memory.available ? health.memory.usedJSHeapSize : 'N/A';
+        document.getElementById('memTotal').innerHTML = 
+          health.memory.available ? `/ ${health.memory.totalJSHeapSize}` : '';
+        
+        // Observers
+        document.getElementById('observerCount').textContent = health.observers.total;
+        
+        // Accuracy
+        const accuracy = window.FP_AI_MAINTENANCE.FeedbackCollector.getAccuracy();
+        if (accuracy) {
+          document.getElementById('accuracy').textContent = accuracy.accuracy;
+          document.getElementById('accuracyDetail').innerHTML = `
+            <div class="stat-label">Confiança média: ${accuracy.avgConfidence}%</div>
+            <div class="stat-label">Total: ${accuracy.total} classificações</div>
+          `;
+        }
+        
+        // Rate Limits
+        updateRateLimits(health.rateLimit);
+        
+        // Feedback
+        updateFeedbackStats();
+        
+        // Check warnings
+        checkWarnings(health);
+        
+        document.querySelector('.timestamp').textContent = 
+          `Última atualização: ${new Date().toLocaleTimeString('pt-BR')}`;
+        
+      } catch (e) {
+        console.error('Dashboard error:', e);
+      }
+    }
+
+    function updateRateLimits(limits) {
+      let html = '';
+      for (const [key, value] of Object.entries(limits)) {
+        const pct = Math.round((value.used / value.limit) * 100);
+        html += `
+          <tr>
+            <td><strong>${key}</strong></td>
+            <td>${value.used}</td>
+            <td>${value.limit}</td>
+            <td>${value.available}</td>
+            <td>${value.resetIn}</td>
+          </tr>
+        `;
+      }
+      document.getElementById('rateLimitTable').innerHTML = html;
+    }
+
+    function updateFeedbackStats() {
+      try {
+        const feedback = window.FP_AI_MAINTENANCE.FeedbackCollector._feedback;
+        const correct = feedback.filter(f => f.isCorrect === true).length;
+        const incorrect = feedback.filter(f => f.isCorrect === false).length;
+        
+        document.getElementById('feedbackStats').innerHTML = `
+          <div class="stat-value">${feedback.length}</div>
+          <div class="stat-label">Registros de feedback</div>
+          <div style="margin-top: 8px; font-size: 12px;">
+            ✅ Corretos: ${correct}<br>
+            ❌ Incorretos: ${incorrect}
+          </div>
+        `;
+      } catch (e) {
+        console.error('Feedback error:', e);
+      }
+    }
+
+    function checkWarnings(health) {
+      let warnings = '';
+      
+      if (health.database.status !== 'OK') {
+        warnings += '<div class="error-box">❌ Database não está respondendo</div>';
+      }
+      
+      if (health.observers.total > 50) {
+        warnings += '<div class="warning-box">⚠️ Muitos observadores ativos (possível memory leak)</div>';
+      }
+      
+      if (health.memory.available && health.memory.usedJSHeapSize > health.memory.jsHeapSizeLimit * 0.8) {
+        warnings += '<div class="warning-box">⚠️ Uso de memória alto</div>';
+      }
+      
+      const accuracy = window.FP_AI_MAINTENANCE.FeedbackCollector.getAccuracy();
+      if (accuracy && parseFloat(accuracy.accuracy) < 80) {
+        warnings += '<div class="warning-box">⚠️ Accuracy da IA abaixo de 80%</div>';
+      }
+      
+      document.getElementById('warnings').innerHTML = warnings;
+    }
+
+    function refreshLogs() {
+      try {
+        const level = document.getElementById('logLevel').value;
+        const logs = window.FP_AI_MAINTENANCE.Logger.getLogs(level);
+        let html = '';
+        
+        logs.slice(-50).reverse().forEach(log => {
+          const iconMap = { DEBUG: '🔍', INFO: 'ℹ️', WARN: '⚠️', ERROR: '❌' };
+          const classMap = { DEBUG: 'log-debug', INFO: 'log-info', WARN: 'log-warn', ERROR: 'log-error' };
+          const time = new Date(log.timestamp).toLocaleTimeString('pt-BR');
+          html += `<div class="log-line ${classMap[log.level]}">
+            ${iconMap[log.level]} ${time} [${log.module}] ${log.message}
+            ${log.data ? '<br><small style="opacity: 0.7">→ ' + JSON.stringify(log.data).substring(0, 60) + '</small>' : ''}
+          </div>`;
+        });
+        
+        document.getElementById('logs').innerHTML = html || '<div style="opacity: 0.5;">Nenhum log</div>';
+      } catch (e) {
+        console.error('Logs error:', e);
+      }
+    }
+
+    function clearLogs() {
+      if (confirm('Tem certeza que quer limpar os logs?')) {
+        window.FP_AI_MAINTENANCE.Logger._logs = [];
+        refreshLogs();
+      }
+    }
+
+    function clearOldLogs() {
+      window.FP_AI_MAINTENANCE.Logger.clearOld();
+      alert('Logs antigos removidos');
+    }
+
+    function resetRateLimits() {
+      if (confirm('Reset rate limits?')) {
+        window.FP_AI_MAINTENANCE.RateLimiter._buckets = {};
+        alert('Rate limits resetados');
+        updateDashboard();
+      }
+    }
+
+    async function runHealthCheck() {
+      alert('Health check rodando...');
+      await updateDashboard();
+      alert('Health check concluído!');
+    }
+
+    async function exportDiagnostics() {
+      alert('Exportando diagnósticos...');
+      await window.FP_AI_MAINTENANCE.exportDiagnostics();
+      alert('Arquivo baixado!');
+    }
+
+    // Add timestamp container
+    const timestampDiv = document.createElement('div');
+    timestampDiv.className = 'timestamp';
+    timestampDiv.id = 'timestamp';
+    document.querySelector('.container').appendChild(timestampDiv);
+
+    // Inicializar
+    if (checkAvailability()) {
+      updateDashboard();
+      setInterval(updateDashboard, 5000); // Atualizar a cada 5s
+      refreshLogs();
+      setInterval(refreshLogs, 10000); // Atualizar logs a cada 10s
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+{
+  "name": "FinancePro - Gestão Financeira",
+  "short_name": "FinancePro",
+  "description": "Controle financeiro pessoal completo, offline-first e inteligente.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0d1117",
+  "theme_color": "#10b981",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "categories": ["finance", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Nova transação",
+      "short_name": "Nova tx",
+      "description": "Adicionar uma nova transação rapidamente",
+      "url": "./index.html#new-transaction",
+      "icons": [{ "src": "icon.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Ver resumo financeiro",
+      "url": "./index.html#dashboard",
+      "icons": [{ "src": "icon.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Orçamentos",
+      "short_name": "Orçamentos",
+      "description": "Acompanhar limites mensais",
+      "url": "./index.html#budget",
+      "icons": [{ "src": "icon.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Simulador",
+      "short_name": "Simular",
+      "description": "Simular cenários financeiros",
+      "url": "./index.html#simulator",
+      "icons": [{ "src": "icon.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Desafios",
+      "short_name": "Desafios",
+      "description": "Ver desafios e conquistas",
+      "url": "./index.html#challenges",
+      "icons": [{ "src": "icon.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Educação Financeira",
+      "short_name": "Educação",
+      "description": "Aprender sobre finanças pessoais",
+      "url": "./index.html#education",
+      "icons": [{ "src": "icon.svg", "sizes": "192x192" }]
+    }
+  ],
+  "prefer_related_applications": false,
+  "permissions": ["notifications", "periodic-background-sync", "background-sync"]
+}

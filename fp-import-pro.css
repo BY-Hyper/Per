@@ -1,0 +1,189 @@
+/* ═══════════════════════════════════════════════════════════
+   FinancePro Import/Export Pro — Estilos
+   Prefixo .fp-imp-* (zero colisão)
+═══════════════════════════════════════════════════════════ */
+
+.fp-imp-panel{margin-top:1rem}
+.fp-imp-hdr-actions{display:flex;gap:.4rem}
+
+/* ─── Drop zone ─── */
+.fp-imp-drop{
+  border:2px dashed var(--bdr-s);
+  border-radius:14px;
+  padding:2.25rem 1.5rem;
+  text-align:center;
+  cursor:pointer;
+  transition:all .2s ease;
+  background:linear-gradient(180deg,var(--bg-s),transparent);
+}
+.fp-imp-drop:hover,.fp-imp-drop.drag-over{
+  border-color:var(--accent);
+  background:rgba(var(--accent-rgb),.05);
+  transform:scale(1.005);
+}
+.fp-imp-drop i{
+  font-size:2.5rem;color:var(--accent);
+  margin-bottom:.65rem;display:block;
+  animation:fpImpFloat 2.5s ease infinite alternate;
+}
+@keyframes fpImpFloat{from{transform:translateY(0)}to{transform:translateY(-6px)}}
+.fp-imp-drop p{margin:.3rem 0;color:var(--txt2);font-size:.875rem}
+.fp-imp-drop p strong{color:var(--txt);font-weight:700}
+.fp-imp-formats{font-size:.75rem;color:var(--txt3)}
+
+/* ─── Status ─── */
+.fp-imp-status{
+  margin-top:1rem;
+  padding:.85rem 1rem;
+  border-radius:10px;
+  font-size:.85rem;
+}
+.fp-imp-status.hidden{display:none}
+.fp-imp-status .fp-imp-ok{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(16,185,129,.08);
+  border-left:3px solid var(--success);
+  padding:.65rem .85rem;border-radius:8px;
+  color:var(--success);font-weight:500;
+}
+.fp-imp-status .fp-imp-error{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(239,68,68,.08);
+  border-left:3px solid var(--danger);
+  padding:.65rem .85rem;border-radius:8px;
+  color:var(--danger);font-weight:500;
+}
+
+/* ─── Toolbar do preview ─── */
+.fp-imp-toolbar{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:.75rem;
+  margin:1rem 0;padding:.75rem;
+  background:var(--bg-s);border-radius:10px;
+}
+.fp-imp-tool-group{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.fp-imp-tool-group label{font-size:.78rem;color:var(--txt2);font-weight:500}
+.fp-imp-tool-actions{display:flex;gap:.5rem;margin-left:auto}
+
+/* ─── Tabela do preview ─── */
+.fp-imp-table-wrap{
+  overflow-x:auto;
+  border:1px solid var(--bdr);
+  border-radius:10px;
+  max-height:60vh;overflow-y:auto;
+}
+.fp-imp-table{
+  width:100%;border-collapse:collapse;
+  font-size:.82rem;
+  min-width:780px;
+}
+.fp-imp-table thead{
+  position:sticky;top:0;
+  background:var(--bg-s);
+  z-index:1;
+}
+.fp-imp-table th{
+  text-align:left;padding:.6rem .65rem;
+  font-size:.7rem;text-transform:uppercase;letter-spacing:.5px;
+  font-weight:700;color:var(--txt2);
+  border-bottom:1px solid var(--bdr);
+}
+.fp-imp-table th.fp-imp-th-amount{text-align:right}
+.fp-imp-table tbody tr{
+  border-bottom:1px solid var(--bdr);
+  transition:background .15s ease;
+}
+.fp-imp-table tbody tr:hover{background:rgba(var(--accent-rgb),.03)}
+.fp-imp-table td{padding:.4rem .55rem;vertical-align:middle}
+
+/* ─── Inputs inline ─── */
+.fp-imp-cell-input{
+  width:100%;padding:5px 7px;
+  background:transparent;
+  border:1px solid transparent;
+  border-radius:5px;
+  font-size:.82rem;
+  font-family:var(--font-b);
+  color:var(--txt);
+  transition:border-color .15s ease;
+}
+.fp-imp-cell-input:hover{border-color:var(--bdr-s)}
+.fp-imp-cell-input:focus{
+  border-color:var(--accent);outline:none;
+  background:var(--surf);
+  box-shadow:0 0 0 2px rgba(var(--accent-rgb),.1);
+}
+.fp-imp-desc{min-width:160px}
+.fp-imp-cat,.fp-imp-type{cursor:pointer}
+.fp-imp-amt{text-align:right;font-weight:700;font-family:var(--font-h);white-space:nowrap}
+.fp-imp-amt-input{text-align:right;font-weight:700;max-width:110px}
+.fp-imp-amt-exp{color:var(--danger)}
+.fp-imp-amt-inc{color:var(--success)}
+
+/* ─── Linha duplicada ─── */
+.fp-imp-row-dup{
+  background:rgba(245,158,11,.05) !important;
+  position:relative;
+}
+.fp-imp-row-dup td{opacity:.65}
+.fp-imp-dup-tag{
+  display:inline-flex;align-items:center;gap:3px;
+  padding:1px 6px;border-radius:9999px;
+  background:rgba(245,158,11,.18);color:var(--warning);
+  font-size:.65rem;font-weight:700;
+  margin-left:.4rem;
+  text-transform:uppercase;letter-spacing:.4px;
+}
+.fp-imp-dup-tag i{font-size:.6rem}
+
+/* ─── Badges de origem da categorização ─── */
+.fp-imp-cat-cell{display:flex;align-items:center;gap:5px}
+.fp-imp-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:18px;height:18px;border-radius:5px;
+  font-size:.62rem;font-weight:800;font-family:var(--font-h);
+  flex-shrink:0;
+  cursor:help;
+}
+.fp-imp-badge-rule{background:rgba(16,185,129,.18);color:var(--success)}
+.fp-imp-badge-ai{background:rgba(139,92,246,.18);color:#8b5cf6}
+.fp-imp-badge-file{background:rgba(59,130,246,.18);color:var(--info)}
+.fp-imp-badge-default{background:rgba(156,163,175,.25);color:var(--txt3)}
+.fp-imp-conf{
+  font-size:.62rem;font-weight:700;
+  color:var(--txt3);
+  padding:1px 5px;border-radius:4px;
+  background:var(--bg-s);
+  flex-shrink:0;
+}
+
+/* ─── Tabela de regras ─── */
+.fp-imp-rules-table{
+  width:100%;border-collapse:collapse;
+  font-size:.85rem;
+}
+.fp-imp-rules-table th{
+  text-align:left;padding:.55rem .65rem;
+  font-size:.7rem;text-transform:uppercase;letter-spacing:.5px;
+  color:var(--txt2);font-weight:700;
+  border-bottom:1px solid var(--bdr);
+}
+.fp-imp-rules-table td{padding:.4rem .65rem;border-bottom:1px solid var(--bdr)}
+.fp-imp-rules-table tbody tr:hover{background:rgba(var(--accent-rgb),.03)}
+.fp-imp-rules-table .form-inp{padding:6px 8px;font-size:.82rem}
+
+/* ─── Responsivo ─── */
+@media(max-width:768px){
+  .fp-imp-toolbar{flex-direction:column;align-items:stretch}
+  .fp-imp-tool-actions{margin-left:0;width:100%;justify-content:space-between}
+  .fp-imp-tool-actions .btn{flex:1;justify-content:center}
+  .fp-imp-tool-group{justify-content:space-between}
+  .fp-imp-drop{padding:1.5rem 1rem}
+  .fp-imp-drop i{font-size:2rem}
+  .fp-imp-table{font-size:.78rem;min-width:680px}
+  .fp-imp-cell-input{font-size:.78rem}
+}
+@media(max-width:480px){
+  .fp-imp-table-wrap{font-size:.75rem;max-height:50vh}
+  .fp-imp-tool-group label{display:none}
+}

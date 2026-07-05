@@ -1,0 +1,53 @@
+## ✅ Correções Aplicadas ao Bradesco
+
+**Problema:** Descrições de transação truncadas e mal formatadas ao importar CSV Bradesco.
+
+### 🔧 Soluções Implementadas
+
+#### 1. **CSVs do Bradesco Reformatados**
+Os arquivos CSV foram automaticamente melhorados com descrições mais legíveis:
+
+- `PIX - Ref: XXXXX` (antes: "TRANSFERENCIA PIX")
+- `Salário - XXXXX` (antes: "CREDITO DE SALARIO")
+- `Pagamento Cartão - XXXXX` (antes: "GASTOS CARTAO DE CREDITO")
+- `Rendimentos - XXXXX` (antes: "RENDIMENTOS")
+- `Saldo para Cartão - XXXXX` (antes: "TRANSF SALDO C/SAL P/CC")
+
+#### 2. **Parser Melhorado em `fp-import-pro.js`**
+- Normalização específica para Bradesco preserva informações importantes
+- Extração de payee reconhece tipos de transação
+- Mantém compatibilidade com outros bancos
+
+#### 3. **Backups Automáticos**
+Arquivos originais preservados com sufixo `.backup.csv`:
+- `14e4451f-c7fd-4a03-8a73-eaa1abfa4869.backup.csv`
+- `a27c8e68-ac5e-4332-9e23-87371e2dd7d2.backup.csv`
+
+---
+
+### 📌 Como Usar
+
+1. **Importar os novos CSVs:** O sistema agora importará com descrições legíveis
+2. **Testar no dashboard:** As transações mostrarão tipos e referências claramente
+3. **Restaurar se necessário:** Use os arquivos `.backup.csv` para reverter
+
+---
+
+### 🎯 Resultado Esperado
+
+**Antes:**
+```
+Descrição: TRANSFERENCIA PIX
+Payee: (vazio)
+```
+
+**Depois:**
+```
+Descrição: PIX - Ref: 1234567
+Payee: PIX - Ref: 1234567
+Categoria: (auto-detectada como Transferência)
+```
+
+---
+
+Ver `BRADESCO_IMPROVEMENTS.md` para análise completa e recomendações futuras.

@@ -1,0 +1,167 @@
+/* ═══════════════════════════════════════════════════════════
+   FinancePro LLM Pro — Estilos
+   Prefixo .fp-llm-* (zero colisão)
+═══════════════════════════════════════════════════════════ */
+
+.fp-llm-card{margin-top:1rem;grid-column:1/-1}
+.fp-llm-card .card-hdr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
+
+/* ─── Status badge ─── */
+.fp-llm-status{
+  display:inline-flex;align-items:center;gap:.4rem;
+  padding:5px 11px;border-radius:9999px;
+  background:var(--bg-s);
+  font-size:.75rem;font-weight:600;color:var(--txt2);
+}
+.fp-llm-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--bdr-s);
+  flex-shrink:0;
+}
+.fp-llm-dot-loading{background:var(--warning);animation:fpLlmPulse 1.2s ease infinite}
+.fp-llm-dot-ok{background:var(--success);box-shadow:0 0 0 3px rgba(16,185,129,.2)}
+.fp-llm-dot-err{background:var(--danger)}
+@keyframes fpLlmPulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ─── Help banner ─── */
+.fp-llm-help{
+  display:flex;gap:.5rem;align-items:flex-start;
+  background:rgba(var(--accent-rgb),.07);
+  border-left:3px solid var(--accent);
+  padding:.7rem .9rem;border-radius:8px;
+  font-size:.78rem;color:var(--txt2);
+  margin-bottom:1rem;
+}
+.fp-llm-help i{color:var(--accent);margin-top:1px;flex-shrink:0}
+
+/* ─── Section title ─── */
+.fp-llm-section-title{
+  font-size:.8rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.5px;
+  color:var(--txt2);
+  margin:1rem 0 .65rem;padding-bottom:.4rem;
+  border-bottom:1px solid var(--bdr);
+}
+
+/* ─── Catálogo ─── */
+.fp-llm-catalog{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:.75rem;
+}
+.fp-llm-model{
+  background:var(--surf);
+  border:1.5px solid var(--bdr);
+  border-radius:12px;
+  padding:1rem;
+  transition:all .2s ease;
+  display:flex;flex-direction:column;gap:.55rem;
+}
+.fp-llm-model:hover{
+  border-color:var(--bdr-s);
+  transform:translateY(-2px);
+  box-shadow:var(--shadow-md);
+}
+.fp-llm-model.active{
+  border-color:var(--accent);
+  background:linear-gradient(180deg,rgba(var(--accent-rgb),.05),var(--surf));
+  box-shadow:0 4px 14px rgba(var(--accent-rgb),.15);
+}
+
+.fp-llm-model-hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:.4rem}
+.fp-llm-model-name{
+  font-size:.95rem;font-weight:700;color:var(--txt);
+  font-family:var(--font-h);line-height:1.25;
+}
+.fp-llm-model-tags{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+
+.fp-llm-tag{
+  display:inline-flex;align-items:center;gap:3px;
+  padding:1px 7px;border-radius:9999px;
+  background:var(--bg-s);color:var(--txt2);
+  font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;
+}
+.fp-llm-tag-low{background:rgba(16,185,129,.15);color:var(--success)}
+.fp-llm-tag-mid{background:rgba(245,158,11,.15);color:var(--warning)}
+.fp-llm-tag-high{background:rgba(239,68,68,.15);color:var(--danger)}
+.fp-llm-tag-ok{background:rgba(16,185,129,.15);color:var(--success)}
+.fp-llm-tag-active{
+  background:linear-gradient(135deg,var(--accent),#3b82f6);
+  color:#fff;
+  animation:fpLlmGlow 2s ease infinite;
+}
+@keyframes fpLlmGlow{0%,100%{box-shadow:0 0 0 0 rgba(var(--accent-rgb),.4)}50%{box-shadow:0 0 0 4px rgba(var(--accent-rgb),0)}}
+
+.fp-llm-model-desc{
+  font-size:.78rem;color:var(--txt2);
+  line-height:1.4;
+  flex:1;
+}
+
+.fp-llm-model-actions{
+  display:flex;gap:.4rem;flex-wrap:wrap;
+  margin-top:.4rem;
+}
+.fp-llm-model-actions .btn{flex:1;justify-content:center;padding:7px 12px;font-size:.78rem}
+.fp-llm-model-actions .btn-ghost{flex:0 0 auto;padding:7px 9px}
+
+/* ─── Progress bar ─── */
+.fp-llm-progress{
+  margin-top:.5rem;
+  display:flex;flex-direction:column;gap:4px;
+}
+.fp-llm-progress.hidden{display:none}
+.fp-llm-progress-bar{
+  height:7px;
+  background:var(--bdr);
+  border-radius:9999px;
+  overflow:hidden;
+  position:relative;
+}
+.fp-llm-progress-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--accent),#3b82f6);
+  border-radius:9999px;
+  transition:width .3s ease;
+  position:relative;
+  overflow:hidden;
+}
+.fp-llm-progress-fill::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);
+  animation:fpLlmShimmer 1.5s linear infinite;
+}
+@keyframes fpLlmShimmer{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.fp-llm-progress-txt{
+  font-size:.7rem;color:var(--txt2);text-align:center;font-weight:600;
+}
+
+/* ─── Linha de ações ─── */
+.fp-llm-row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.5rem}
+.fp-llm-hint{font-size:.75rem;color:var(--txt2)}
+
+/* ─── Diagnóstico (output) ─── */
+.fp-llm-diag{
+  margin-top:.75rem;
+  background:var(--bg);
+  border:1px solid var(--bdr);
+  border-radius:8px;
+  padding:.75rem .9rem;
+  font-family:'Consolas','Monaco','Courier New',monospace;
+  font-size:.78rem;line-height:1.5;
+  color:var(--txt);
+  max-height:280px;overflow:auto;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+.fp-llm-diag.hidden{display:none}
+
+/* ─── Responsivo ─── */
+@media(max-width:768px){
+  .fp-llm-catalog{grid-template-columns:1fr}
+  .fp-llm-card .card-hdr{flex-direction:column;align-items:stretch}
+  .fp-llm-status{align-self:flex-start}
+  .fp-llm-row{flex-direction:column;align-items:stretch}
+  .fp-llm-row .btn{width:100%;justify-content:center}
+  .fp-llm-row input,.fp-llm-row .fp-llm-hint{width:100%}
+}

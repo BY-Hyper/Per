@@ -1,0 +1,206 @@
+/* ═══════════════════════════════════════════════════════════
+   FinancePro Extensions — estilos isolados
+   Usa as variáveis CSS do app principal (--accent, --surf, etc.)
+   Prefixo: .fp-ext-* para evitar qualquer colisão.
+═══════════════════════════════════════════════════════════ */
+
+/* ─────── Painel de configurações ─────── */
+.fp-ext-settings-panel{margin-top:1rem;grid-column:1/-1}
+.fp-ext-settings-panel .toggle-row{padding:.85rem 0}
+.fp-ext-row{display:flex;align-items:flex-end;gap:.75rem;flex-wrap:wrap;margin-top:.6rem}
+.fp-ext-info{margin-top:.85rem;padding:.65rem .85rem;background:rgba(var(--accent-rgb),.07);border-left:3px solid var(--accent);border-radius:8px;font-size:.78rem;color:var(--txt2);display:flex;align-items:center;gap:.5rem}
+.fp-ext-info i{color:var(--accent)}
+
+/* ─────── Botão Conquistas (topbar) ─────── */
+.fp-ext-game-btn{position:relative}
+.fp-ext-game-lvl{
+  position:absolute;top:-4px;right:-4px;
+  min-width:18px;height:18px;padding:0 4px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-d));
+  color:#fff;border-radius:9999px;
+  font-size:10px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  border:2px solid var(--surf);
+  box-shadow:0 2px 6px rgba(var(--accent-rgb),.4);
+}
+
+/* ─────── Modal de Conquistas ─────── */
+.fp-ext-stats-row{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1rem;
+}
+.fp-ext-stat-card{
+  background:var(--bg-s);border:1px solid var(--bdr);border-radius:12px;
+  padding:.7rem .8rem;text-align:center;
+}
+.fp-ext-stat-lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--txt2);margin-bottom:4px;font-weight:600}
+.fp-ext-stat-val{font-size:1.35rem;font-weight:800;font-family:var(--font-h);color:var(--txt);letter-spacing:-.5px}
+
+.fp-ext-xp-bar-wrap{margin-bottom:1.25rem}
+.fp-ext-xp-label{font-size:.78rem;color:var(--txt2);margin-bottom:6px;font-weight:500}
+.fp-ext-xp-bar{height:8px;background:var(--bdr);border-radius:9999px;overflow:hidden}
+.fp-ext-xp-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--accent),#3b82f6);
+  border-radius:9999px;
+  transition:width .6s cubic-bezier(.34,1.3,.64,1);
+}
+
+.fp-ext-section-title{
+  font-size:.85rem;font-weight:700;color:var(--txt);
+  margin:1.25rem 0 .65rem;padding-bottom:.4rem;
+  border-bottom:1px solid var(--bdr);
+  display:flex;align-items:center;gap:.4rem;
+}
+
+.fp-ext-badges-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.6rem;
+}
+.fp-ext-badge{
+  background:var(--surf);border:1px solid var(--bdr);border-radius:12px;
+  padding:.85rem .65rem;text-align:center;
+  transition:transform .15s ease,box-shadow .15s ease;
+  cursor:default;
+}
+.fp-ext-badge.earned{
+  border-color:var(--accent);
+  background:linear-gradient(180deg,rgba(var(--accent-rgb),.06),var(--surf));
+  box-shadow:0 4px 12px rgba(var(--accent-rgb),.12);
+}
+.fp-ext-badge.earned:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(var(--accent-rgb),.18)}
+.fp-ext-badge.locked{opacity:.45;filter:grayscale(.5)}
+.fp-ext-badge-icon{font-size:1.85rem;margin-bottom:.4rem;line-height:1}
+.fp-ext-badge-name{font-size:.82rem;font-weight:700;color:var(--txt);margin-bottom:3px;line-height:1.2}
+.fp-ext-badge-desc{font-size:.7rem;color:var(--txt2);margin-bottom:6px;line-height:1.3;min-height:2.6em}
+.fp-ext-badge-xp{font-size:.7rem;color:var(--accent);font-weight:700}
+.fp-ext-badge.locked .fp-ext-badge-xp{color:var(--txt3)}
+
+/* ─────── Desafios ─────── */
+.fp-ext-challenges{display:flex;flex-direction:column;gap:.6rem}
+.fp-ext-challenge{
+  display:flex;gap:.75rem;align-items:center;
+  background:var(--surf);border:1px solid var(--bdr);border-radius:12px;
+  padding:.75rem .9rem;
+}
+.fp-ext-challenge.done{border-color:var(--success);background:linear-gradient(90deg,rgba(16,185,129,.06),var(--surf))}
+.fp-ext-challenge-icon{font-size:1.6rem;width:42px;text-align:center;flex-shrink:0}
+.fp-ext-challenge-body{flex:1;min-width:0}
+.fp-ext-challenge-title{font-size:.85rem;font-weight:600;color:var(--txt);display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.fp-ext-challenge-meta{font-size:.7rem;color:var(--txt2);margin-top:4px;font-weight:500}
+.fp-ext-tag{
+  display:inline-block;padding:1px 7px;border-radius:9999px;
+  background:rgba(16,185,129,.15);color:var(--success);
+  font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;
+}
+
+/* ─────── Pop-up Celebração de Conquista ─────── */
+.fp-ext-celebrate{
+  position:fixed;inset:0;z-index:700;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;
+  opacity:0;transition:opacity .35s ease;
+}
+.fp-ext-celebrate.show{opacity:1}
+.fp-ext-celebrate-card{
+  background:linear-gradient(135deg,var(--surf),var(--bg-s));
+  border:2px solid var(--accent);
+  border-radius:20px;
+  padding:1.75rem 2.25rem;
+  text-align:center;
+  box-shadow:0 24px 64px rgba(0,0,0,.35),0 0 80px rgba(var(--accent-rgb),.4);
+  transform:scale(.7) translateY(40px);
+  transition:transform .45s cubic-bezier(.34,1.6,.64,1);
+  min-width:280px;max-width:90vw;
+  position:relative;overflow:hidden;
+}
+.fp-ext-celebrate.show .fp-ext-celebrate-card{transform:scale(1) translateY(0)}
+.fp-ext-celebrate-card::before{
+  content:'';position:absolute;inset:-50%;
+  background:conic-gradient(from 0deg,
+    transparent,
+    rgba(var(--accent-rgb),.15),
+    transparent,
+    rgba(var(--accent-rgb),.15),
+    transparent);
+  animation:fpExtSpin 4s linear infinite;
+  z-index:0;
+}
+.fp-ext-celebrate-card>*{position:relative;z-index:1}
+@keyframes fpExtSpin{to{transform:rotate(360deg)}}
+.fp-ext-celebrate-emoji{
+  font-size:4rem;margin-bottom:.5rem;line-height:1;
+  animation:fpExtBounce .65s ease infinite alternate;
+  filter:drop-shadow(0 4px 8px rgba(0,0,0,.2));
+}
+@keyframes fpExtBounce{from{transform:translateY(0) rotate(-5deg)}to{transform:translateY(-8px) rotate(5deg)}}
+.fp-ext-celebrate-title{
+  font-size:.78rem;text-transform:uppercase;letter-spacing:1.5px;
+  color:var(--accent);font-weight:700;margin-bottom:.3rem;
+}
+.fp-ext-celebrate-name{
+  font-size:1.4rem;font-weight:800;color:var(--txt);
+  font-family:var(--font-h);margin-bottom:.4rem;
+}
+.fp-ext-celebrate-desc{
+  font-size:.85rem;color:var(--txt2);margin-bottom:.85rem;
+}
+.fp-ext-celebrate-xp{
+  display:inline-block;padding:6px 16px;
+  background:var(--accent);color:#fff;
+  border-radius:9999px;font-weight:700;font-size:.85rem;
+  box-shadow:0 4px 12px rgba(var(--accent-rgb),.4);
+}
+
+/* ─────── Botão biométrico no lockScreen ─────── */
+.fp-ext-bio-btn{
+  margin-top:1.25rem;
+  background:linear-gradient(135deg,rgba(var(--accent-rgb),.1),rgba(var(--accent-rgb),.04));
+  border:1.5px solid var(--accent);
+  color:var(--accent);
+}
+.fp-ext-bio-btn:hover{
+  background:var(--accent);color:#fff;
+  transform:translateY(-2px);
+  box-shadow:0 6px 16px rgba(var(--accent-rgb),.4);
+}
+.fp-ext-bio-btn i{font-size:1.1rem}
+
+/* ─────── Toast de Undo (botão extra, não interfere com o existente) ─────── */
+.toast .toast-undo{
+  background:rgba(var(--accent-rgb),.12);
+  border:none;color:var(--accent);
+  font-weight:700;font-size:.78rem;
+  padding:3px 10px;border-radius:6px;
+  cursor:pointer;margin-left:6px;
+  transition:all .15s ease;
+}
+.toast .toast-undo:hover{background:var(--accent);color:#fff}
+
+/* ─────── Responsivo ─────── */
+@media (max-width:768px){
+  .fp-ext-stats-row{grid-template-columns:repeat(2,1fr)}
+  .fp-ext-badges-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+  .fp-ext-celebrate-card{padding:1.5rem 1.25rem;min-width:0;width:90%}
+  .fp-ext-celebrate-emoji{font-size:3.2rem}
+  .fp-ext-celebrate-name{font-size:1.2rem}
+  .fp-ext-row{flex-direction:column;align-items:stretch}
+  .fp-ext-row .btn{width:100%;justify-content:center}
+}
+@media (max-width:420px){
+  .fp-ext-stats-row{grid-template-columns:1fr 1fr;gap:.4rem}
+  .fp-ext-stat-val{font-size:1.1rem}
+  .fp-ext-badge{padding:.7rem .5rem}
+  .fp-ext-badge-icon{font-size:1.5rem}
+}
+
+/* ─────── Estado offline (indicador discreto) ─────── */
+.fp-ext-offline-pill{
+  position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);
+  background:var(--warning);color:#fff;
+  padding:5px 14px;border-radius:9999px;
+  font-size:.75rem;font-weight:700;
+  box-shadow:0 4px 12px rgba(245,158,11,.4);
+  z-index:600;
+  display:flex;align-items:center;gap:6px;
+  animation:fpExtFadeUp .35s ease;
+}
+@keyframes fpExtFadeUp{from{opacity:0;transform:translate(-50%,20px)}to{opacity:1;transform:translate(-50%,0)}}
